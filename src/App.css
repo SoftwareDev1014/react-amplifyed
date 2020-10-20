@@ -47,6 +47,15 @@
 .mt-20{
   margin-top: -20px;
 }
+.mt_20{
+  margin-top: 20px;
+}
+.p10{
+  padding: 10px;
+}
+.p20{
+  padding: 20px;
+}
 .headline{
   color:grey;
   font-size: 30px;
