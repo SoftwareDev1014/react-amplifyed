@@ -36,3 +36,19 @@
     transform: rotate(360deg);
   }
 }
+
+
+.left{
+  text-align: left;
+}
+.right{
+  text-align: right;
+}
+.mt-20{
+  margin-top: -20px;
+}
+.headline{
+  color:grey;
+  font-size: 30px;
+  margin: 20px 0;
+}
