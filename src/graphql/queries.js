@@ -6,6 +6,8 @@ export const getCategory = /* GraphQL */ `
     getCategory(id: $id) {
       id
       name
+      description
+      key_words
       createdAt
       updatedAt
     }
@@ -21,6 +23,8 @@ export const listCategorys = /* GraphQL */ `
       items {
         id
         name
+        description
+        key_words
         createdAt
         updatedAt
       }

@@ -11,6 +11,7 @@ import { API, graphqlOperation } from 'aws-amplify'
 import {createCategory, deleteCategory} from '../graphql/mutations'
 import { listCategorys } from '../graphql/queries'
 import { makeStyles } from '@material-ui/core/styles';
+import EnhancedTable from "../Componetns/EnhancedTable";
 
 const initialState = { name: ''}
 
@@ -75,20 +76,28 @@ function Home() {
     return (
         <div className="App">
             <div>
-                <div className="right">
-                    <Button variant="outlined" style={{borderRadius:"50px"}}
-                            component={Link} to={'/edit-category'}
-                    >
-                        Edit Categories
-                    </Button>
+                <div className={'headline'}>
+                    Create New Category
                 </div>
-                <div className="left mt-20">
-                    <Button variant="outlined" color="primary">
-                        Add Category
-                    </Button>
+                <div style={{display:'flex',justifyContent:'space-around'}}>
+                    <div>
+                        <Button variant="outlined"
+                                component={Link} to={'/edit-category'}
+                        >
+                            Edit Existing Categories
+                        </Button>
+                    </div>
+                    <div>
+                        <Button variant="outlined"
+                                component={Link} to={'/delete-category'}
+                        >
+                            Delete Category
+                        </Button>
+                    </div>
                 </div>
             </div>
-            <form onSubmit={addCategory}>
+            <EnhancedTable />
+            {/*<form onSubmit={addCategory}>
                 <div style={{textAlign: 'left'}}>
                     <div className="headline">Enter Category Name</div>
                     <TextField
@@ -127,7 +136,7 @@ function Home() {
                         />
                     );
                 })}
-            </Paper>
+            </Paper>*/}
 
         </div>
     );

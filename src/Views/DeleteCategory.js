@@ -40,7 +40,8 @@ const useStyles = makeStyles((theme) => ({
         padding:'5px'
     },
 }));
-function CategoryEdit() {
+
+export default function DeleteCategory() {
     const classes = useStyles();
     const [formState, setFormState] = useState(initialState)
     const [isDlg, setIsDlg] = useState(false)
@@ -133,7 +134,8 @@ function CategoryEdit() {
             </Dialog>
             <div>
                 <div className={'headline'}>
-                    Edit Existing Category
+                    Delete Category
+
                 </div>
                 <div style={{display:'flex',justifyContent:'space-around'}}>
                     <div>
@@ -145,13 +147,14 @@ function CategoryEdit() {
                     </div>
                     <div>
                         <Button variant="outlined"
-                                component={Link} to={'/delete-category'}
+                                component={Link} to={'/edit-category'}
                         >
-                            Delete Category
+                            Edit Existing Category
                         </Button>
                     </div>
                 </div>
             </div>
+
             <Paper elevation={3} className="mt_20 p20">
                 {categories.map((data) => {
                     return (
@@ -168,6 +171,4 @@ function CategoryEdit() {
             </Paper>
         </div>
     );
-}
-
-export default CategoryEdit;
+};

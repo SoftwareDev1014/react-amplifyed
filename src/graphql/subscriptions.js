@@ -6,6 +6,8 @@ export const onCreateCategory = /* GraphQL */ `
     onCreateCategory {
       id
       name
+      description
+      key_words
       createdAt
       updatedAt
     }
@@ -16,6 +18,8 @@ export const onUpdateCategory = /* GraphQL */ `
     onUpdateCategory {
       id
       name
+      description
+      key_words
       createdAt
       updatedAt
     }
@@ -26,6 +30,8 @@ export const onDeleteCategory = /* GraphQL */ `
     onDeleteCategory {
       id
       name
+      description
+      key_words
       createdAt
       updatedAt
     }

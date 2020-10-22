@@ -1,4 +1,6 @@
 type Category @model {
   id: ID!
-  name: String!
+  name: String!,
+  description:String,
+  key_words: [String],
 }
