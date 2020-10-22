@@ -10,6 +10,7 @@ import TableHead from '@material-ui/core/TableHead';
 import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
 import TableSortLabel from '@material-ui/core/TableSortLabel';
+import TextField from '@material-ui/core/TextField';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
@@ -20,12 +21,15 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Switch from '@material-ui/core/Switch';
 import DeleteIcon from '@material-ui/icons/Delete';
 import FilterListIcon from '@material-ui/icons/FilterList';
-
+import AddIcon from '@material-ui/icons/Add';
+import Chip from '@material-ui/core/Chip';
+import {Link} from "react-router-dom";
+import Button from "@material-ui/core/Button";
 function createData(name, calories, fat, carbs, protein) {
     return { name, calories, fat, carbs, protein };
 }
 
-const rows = [
+const init_rows = [
     createData('Cupcake', 305, 3.7, 67, 4.3),
     createData('Donut', 452, 25.0, 51, 4.9),
     createData('Eclair', 262, 16.0, 24, 6.0),
@@ -68,11 +72,9 @@ function stableSort(array, comparator) {
 }
 
 const headCells = [
-    { id: 'name', numeric: false, disablePadding: false, label: 'Dessert (100g serving)' },
-    { id: 'calories', numeric: false, disablePadding: false, label: 'Calories' },
-    { id: 'fat', numeric: false, disablePadding: false, label: 'Fat (g)' },
-    { id: 'carbs', numeric: false, disablePadding: false, label: 'Carbs (g)' },
-    { id: 'protein', numeric: false, disablePadding: false, label: 'Protein (g)' },
+    { id: 'name', numeric: false, disablePadding: false, label: 'Category Name',width:'140px' },
+    { id: 'description', numeric: false, disablePadding: false, label: 'Category Description',width:'180px' },
+    { id: 'keywords', numeric: false, disablePadding: false, label: 'KeyWords/Phrases' },
 ];
 
 function EnhancedTableHead(props) {
@@ -82,8 +84,8 @@ function EnhancedTableHead(props) {
     };
     const [selectable, setSelectable] = React.useState(false);
     return (
-        <TableHead>
-            <TableRow>
+        <TableHead >
+            <TableRow style={{backgroundColor:'lightgrey'}}>
                 {
                     selectable&&
                     <TableCell padding="none">
@@ -108,6 +110,7 @@ function EnhancedTableHead(props) {
                         key={headCell.id}
                         align={headCell.numeric ? 'right' : 'left'}
                         padding={headCell.disablePadding ? 'none' : 'default'}
+                        width={headCell.width}
                         sortDirection={orderBy === headCell.id ? order : false}
                     >
                         <TableSortLabel
@@ -161,7 +164,7 @@ const useToolbarStyles = makeStyles((theme) => ({
 
 const EnhancedTableToolbar = (props) => {
     const classes = useToolbarStyles();
-    const { numSelected } = props;
+    const { numSelected,onAddItem, message } = props;
 
     return (
         <Toolbar
@@ -175,7 +178,7 @@ const EnhancedTableToolbar = (props) => {
                 </Typography>
             ) : (
                 <Typography className={classes.title} variant="h6" id="tableTitle" component="div">
-                    Nutrition
+                    {message}
                 </Typography>
             )}
 
@@ -192,6 +195,11 @@ const EnhancedTableToolbar = (props) => {
                     </IconButton>
                 </Tooltip>
             )}
+            <Tooltip title="Add One Item">
+                <IconButton aria-label="filter list" onClick={onAddItem}>
+                    <AddIcon />
+                </IconButton>
+            </Tooltip>
         </Toolbar>
     );
 };
@@ -204,10 +212,10 @@ const useStyles = makeStyles((theme) => ({
     root: {
         width: '100%',
     },
-    paper: {
+    /*paper: {
         width: '100%',
         marginBottom: theme.spacing(2),
-    },
+    },*/
     table: {
         minWidth: 750,
     },
@@ -222,18 +230,40 @@ const useStyles = makeStyles((theme) => ({
         top: 20,
         width: 1,
     },
+    chip: {
+        margin: theme.spacing(0.5)
+    },
+    paper: {
+        display: 'flex',
+        justifyContent: 'start',
+        flexWrap: 'wrap',
+        listStyle: 'none',
+        padding: theme.spacing(0.5),
+        margin: 0
+    }
 }));
-
-export default function EnhancedTable() {
+AddTable.defaultProps={
+    dense:false,
+    selectable:false,
+    rowsPerPage:5,
+    isHeader:true,
+    rows:[],
+    status:{msg:"", state:0}
+}
+function AddTable(props) {
     const classes = useStyles();
     const [order, setOrder] = React.useState('asc');
+    const [status, setStatus] = React.useState(props.status);
     const [orderBy, setOrderBy] = React.useState('calories');
     const [selected, setSelected] = React.useState([]);
-    const [selectable, setSelectable] = React.useState(false);
+    const [selectable, setSelectable] = React.useState(props.selectable);
     const [page, setPage] = React.useState(0);
-    const [dense, setDense] = React.useState(true);
-    const [rowsPerPage, setRowsPerPage] = React.useState(5);
-
+    const [dense, setDense] = React.useState(props.dense);
+    const [rowsPerPage, setRowsPerPage] = React.useState(props.rowsPerPage);
+    const [rows, setRows] = React.useState(props.rows);
+    React.useEffect(() => {
+        setRows(props.rows);
+    }, [props])
     const handleRequestSort = (event, property) => {
         const isAsc = orderBy === property && order === 'asc';
         setOrder(isAsc ? 'desc' : 'asc');
@@ -281,15 +311,33 @@ export default function EnhancedTable() {
     const handleChangeDense = (event) => {
         setDense(event.target.checked);
     };
+    const handleAddItem = (event) => {
+        let temp=Object.assign([],rows);
+        temp.push({name:'',description:'',key_words:[]})
+        setRows(temp)
+    };
 
     const isSelected = (name) => selected.indexOf(name) !== -1;
 
     const emptyRows = rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
-
+    const getKeyWords=(key_words)=>{
+        if (key_words){
+            return key_words
+        }
+        else{
+            return []
+        }
+    }
     return (
         <div className={classes.root}>
+            {
+                props.isHeader&&
+                <EnhancedTableToolbar numSelected={selected.length}
+                message={status.msg}
+                                      onAddItem={handleAddItem} />
+            }
             <Paper className={classes.paper}>
-                <EnhancedTableToolbar numSelected={selected.length} />
+
                 <TableContainer>
                     <Table
                         className={classes.table}
@@ -300,6 +348,7 @@ export default function EnhancedTable() {
                         <EnhancedTableHead
                             classes={classes}
                             numSelected={selected.length}
+
                             order={order}
                             orderBy={orderBy}
                             onSelectAllClick={handleSelectAllClick}
@@ -319,7 +368,7 @@ export default function EnhancedTable() {
                                             role="checkbox"
                                             aria-checked={isItemSelected}
                                             tabIndex={-1}
-                                            key={row.name}
+                                            key={index}
                                             selected={isItemSelected}
                                         >
                                             {
@@ -332,13 +381,82 @@ export default function EnhancedTable() {
                                                     />
                                                 </TableCell>
                                             }
-                                            <TableCell component="th" id={labelId} scope="row">
-                                                {row.name}
+                                            <TableCell component="th" id={labelId} scope="row" padding="none">
+                                                <TextField
+                                                    id="outlined-secondary"
+                                                    variant="outlined"
+                                                    color="secondary"
+                                                    required
+                                                    size="small"
+                                                    style={{width:'100%'}}
+                                                    onChange={(event)=>{
+                                                        let temp=Object.assign([],rows)
+                                                        temp[index].name=event.target.value
+                                                        setRows(temp)
+                                                        setStatus({msg: "", state:0})
+                                                    }}
+                                                    value={row.name||''}
+                                                />
                                             </TableCell>
-                                            <TableCell align="">{row.calories}</TableCell>
-                                            <TableCell align="">{row.fat}</TableCell>
-                                            <TableCell align="">{row.carbs}</TableCell>
-                                            <TableCell align="">{row.protein}</TableCell>
+                                            <TableCell align="left" padding="none" style={{padding:'0 3px'}}>
+                                                <TextField
+                                                    id="outlined-secondary"
+                                                    variant="outlined"
+                                                    color="secondary"
+                                                    multiline
+                                                    size="small"
+                                                    style={{width:'100%'}}
+                                                    onChange={(event)=>{
+                                                        let temp=Object.assign([],rows)
+                                                        temp[index].description=event.target.value
+                                                        setRows(temp)
+                                                        setStatus({msg: "", state:0})
+                                                    }}
+                                                    value={row.description||''}
+                                                />
+
+                                            </TableCell>
+                                            <TableCell align="left" padding="none">
+                                                <Paper component="ul" className={classes.paper}>
+                                                    {
+                                                        getKeyWords(row.key_words).map((key_word,key_index) => {
+                                                        return (
+                                                            <li key={key_index}>
+                                                                <Chip
+                                                                    label={key_word}
+                                                                    onDelete={()=>{
+                                                                        let temp=Object.assign([],rows)
+                                                                        temp[index].key_words.splice(key_index,1)
+                                                                        setRows(temp)
+                                                                        setStatus({msg: "", state:0})
+                                                                    }}
+                                                                    className={classes.chip}
+                                                                />
+                                                            </li>
+                                                        );
+                                                    })}
+                                                    <TextField
+                                                        variant="outlined"
+                                                        color="secondary"
+                                                        size="small"
+                                                        style={{width:'100px'}}
+                                                        onKeyDown={(event)=>{
+                                                            if (event.key=='Enter' && event.target.value!==''){
+                                                                let temp=Object.assign([],rows)
+                                                                if (!temp[index].key_words){
+                                                                    temp[index].key_words=[]
+                                                                }
+                                                                temp[index].key_words.push(event.target.value)
+                                                                setRows(temp)
+                                                                event.target.value=''
+                                                                setStatus({msg: "", state:0})
+                                                            }
+
+                                                        }}
+                                                    />
+                                                </Paper>
+
+                                            </TableCell>
                                         </TableRow>
                                     );
                                 })}
@@ -360,10 +478,52 @@ export default function EnhancedTable() {
                     onChangeRowsPerPage={handleChangeRowsPerPage}
                 />
             </Paper>
-            <FormControlLabel
-                control={<Switch checked={dense} onChange={handleChangeDense} />}
-                label="Dense padding"
-            />
+            <div style={{marginTop:'20px'}}>
+                {/*<FormControlLabel
+                    control={<Switch checked={dense} onChange={handleChangeDense} />}
+                    label="Dense padding"
+                />*/}
+                {
+                    status.state==0&&<Button variant="outlined"
+                            onClick={()=>{
+                                setStatus({
+                                    msg: "Confirm your Category Addition",
+                                    state:1
+                                })
+                            }}
+                    >
+                        Submit
+                    </Button>
+                }
+                {
+                    status.state==1&&
+                    <div>
+                        <Button variant="outlined"
+                                onClick={()=>{
+                                    setStatus({
+                                        msg: "Added successfully",
+                                        state:3
+                                    })
+                                }}
+                                style={{marginRight:'50px'}}
+                        >
+                            Confirm
+                        </Button>
+                        <Button variant="outlined"
+                                onClick={()=>{
+                                    setStatus({
+                                        msg: "0",
+                                        state:0
+                                    })
+                                }}
+                        >
+                            Cancel
+                        </Button>
+                    </div>
+                }
+            </div>
         </div>
     );
 }
+
+export default AddTable

@@ -11,7 +11,7 @@ import { API, graphqlOperation } from 'aws-amplify'
 import {createCategory, deleteCategory} from '../graphql/mutations'
 import { listCategorys } from '../graphql/queries'
 import { makeStyles } from '@material-ui/core/styles';
-import EnhancedTable from "../Componetns/EnhancedTable";
+import AddTable from "../Componetns/AddTable";
 
 const initialState = { name: ''}
 
@@ -96,7 +96,9 @@ function Home() {
                     </div>
                 </div>
             </div>
-            <EnhancedTable />
+            <br/>
+
+            <AddTable rows={categories}/>
             {/*<form onSubmit={addCategory}>
                 <div style={{textAlign: 'left'}}>
                     <div className="headline">Enter Category Name</div>

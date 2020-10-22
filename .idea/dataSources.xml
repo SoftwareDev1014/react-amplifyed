@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
+    <data-source source="LOCAL" name="fake_us-fake-1" uuid="ac8eb8de-db27-4537-9cc3-4d63c81dc944">
+      <driver-ref>sqlite.xerial</driver-ref>
+      <synchronize>true</synchronize>
+      <jdbc-driver>org.sqlite.JDBC</jdbc-driver>
+      <jdbc-url>jdbc:sqlite:E:\work20201021\react-amplified\amplify\mock-data\dynamodb\fake_us-fake-1.db</jdbc-url>
+    </data-source>
+  </component>
+</project>
