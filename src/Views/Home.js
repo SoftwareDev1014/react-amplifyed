@@ -37,10 +37,10 @@ function Home() {
     const classes = useStyles();
     const [formState, setFormState] = useState(initialState)
     const [status, setStatus] = React.useState({msg:"", state:0});
-    const [categories, setCategories] = useState([{name:"",description:"",key_words:[]}])
-    /*useEffect(() => {
+    const [categories, setCategories] = useState([{categoryName:"",description:"",key_words:[]}])
+    useEffect(() => {
         readCategories()
-    }, [])*/
+    }, [])
     async function readCategories() {
         try {
             const result = await API.graphql(graphqlOperation(listCategorys))
@@ -72,7 +72,7 @@ function Home() {
                 console.log('error creating todo:', err)
             }
         }
-        setCategories([{name:"",description:"",key_words:[]}])
+        setCategories([{categoryName:"",description:"",key_words:[]}])
         setStatus({msg:`Created ${s_count} categories, Failed Count:${rows.length-s_count}`, state: 3})
     }
     const handleDelete= async (data) => {

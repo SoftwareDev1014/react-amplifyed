@@ -247,9 +247,9 @@ AddTable.defaultProps={
     selectable:false,
     rowsPerPage:5,
     isHeader:true,
-    rows:[{name:'',description:'',key_words:[]}],
+    rows:[{categoryName:'',description:'',key_words:[]}],
     status:{msg:"", state:0},
-    handleUpdateRows:null
+    handleAddRows:null
 }
 function AddTable(props) {
     const classes = useStyles();
@@ -274,19 +274,19 @@ function AddTable(props) {
 
     const handleSelectAllClick = (event) => {
         if (event.target.checked) {
-            const newSelecteds = rows.map((n) => n.name);
+            const newSelecteds = rows.map((n) => n.categoryName);
             setSelected(newSelecteds);
             return;
         }
         setSelected([]);
     };
 
-    const handleClick = (event, name) => {
-        const selectedIndex = selected.indexOf(name);
+    const handleClick = (event, categoryName) => {
+        const selectedIndex = selected.indexOf(categoryName);
         let newSelected = [];
 
         if (selectedIndex === -1) {
-            newSelected = newSelected.concat(selected, name);
+            newSelected = newSelected.concat(selected, categoryName);
         } else if (selectedIndex === 0) {
             newSelected = newSelected.concat(selected.slice(1));
         } else if (selectedIndex === selected.length - 1) {
@@ -315,7 +315,7 @@ function AddTable(props) {
     };
     const handleAddItem = (event) => {
         let temp=Object.assign([],rows);
-        temp.push({name:'',description:'',key_words:[]})
+        temp.push({categoryName:'',description:'',key_words:[]})
         setStatus({
             msg: "",
             state:0
@@ -323,7 +323,7 @@ function AddTable(props) {
         setRows(temp)
     };
 
-    const isSelected = (name) => selected.indexOf(name) !== -1;
+    const isSelected = (categoryName) => selected.indexOf(categoryName) !== -1;
 
     const emptyRows = rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
     const getKeyWords=(key_words)=>{
@@ -365,7 +365,7 @@ function AddTable(props) {
                             {stableSort(rows, getComparator(order, orderBy))
                                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                 .map((row, index) => {
-                                    const isItemSelected = isSelected(row.name);
+                                    const isItemSelected = isSelected(row.categoryName);
                                     const labelId = `enhanced-table-checkbox-${index}`;
 
                                     return (
@@ -381,7 +381,7 @@ function AddTable(props) {
                                                 selectable&&
                                                 <TableCell padding="checkbox"  padding="none">
                                                     <Checkbox
-                                                        onClick={(event) => handleClick(event, row.name)}
+                                                        onClick={(event) => handleClick(event, row.categoryName)}
                                                         checked={isItemSelected}
                                                         inputProps={{ 'aria-labelledby': labelId }}
                                                     />
@@ -397,11 +397,11 @@ function AddTable(props) {
                                                     style={{width:'100%'}}
                                                     onChange={(event)=>{
                                                         let temp=Object.assign([],rows)
-                                                        temp[index].name=event.target.value
+                                                        temp[index].categoryName=event.target.value
                                                         setRows(temp)
                                                         setStatus({msg: "", state:0})
                                                     }}
-                                                    value={row.name||''}
+                                                    value={row.categoryName||''}
                                                 />
                                             </TableCell>
                                             <TableCell align="left" padding="none" style={{padding:'0 3px'}}>
@@ -510,7 +510,7 @@ function AddTable(props) {
                                         msg: "Added successfully",
                                         state:3
                                     })*/
-                                    props.handleUpdateRows(rows)
+                                    props.handleAddRows(rows)
                                 }}
                                 style={{marginRight:'50px'}}
                         >

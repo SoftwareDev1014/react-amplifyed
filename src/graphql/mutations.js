@@ -8,7 +8,7 @@ export const createCategory = /* GraphQL */ `
   ) {
     createCategory(input: $input, condition: $condition) {
       id
-      name
+      categoryName
       description
       key_words
       createdAt
@@ -23,7 +23,7 @@ export const updateCategory = /* GraphQL */ `
   ) {
     updateCategory(input: $input, condition: $condition) {
       id
-      name
+      categoryName
       description
       key_words
       createdAt
@@ -38,7 +38,7 @@ export const deleteCategory = /* GraphQL */ `
   ) {
     deleteCategory(input: $input, condition: $condition) {
       id
-      name
+      categoryName
       description
       key_words
       createdAt

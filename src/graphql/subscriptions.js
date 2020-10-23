@@ -5,7 +5,7 @@ export const onCreateCategory = /* GraphQL */ `
   subscription OnCreateCategory {
     onCreateCategory {
       id
-      name
+      categoryName
       description
       key_words
       createdAt
@@ -17,7 +17,7 @@ export const onUpdateCategory = /* GraphQL */ `
   subscription OnUpdateCategory {
     onUpdateCategory {
       id
-      name
+      categoryName
       description
       key_words
       createdAt
@@ -29,7 +29,7 @@ export const onDeleteCategory = /* GraphQL */ `
   subscription OnDeleteCategory {
     onDeleteCategory {
       id
-      name
+      categoryName
       description
       key_words
       createdAt

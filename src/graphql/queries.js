@@ -5,7 +5,7 @@ export const getCategory = /* GraphQL */ `
   query GetCategory($id: ID!) {
     getCategory(id: $id) {
       id
-      name
+      categoryName
       description
       key_words
       createdAt
@@ -22,7 +22,7 @@ export const listCategorys = /* GraphQL */ `
     listCategorys(filter: $filter, limit: $limit, nextToken: $nextToken) {
       items {
         id
-        name
+        categoryName
         description
         key_words
         createdAt
