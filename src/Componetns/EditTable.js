@@ -182,24 +182,20 @@ const EnhancedTableToolbar = (props) => {
                 </Typography>
             )}
 
-            {/*{numSelected > 0 ? (
-                <Tooltip title="Delete">
+            {numSelected > 0 ? (
+                <Tooltip title="Updated Categories">
                     <IconButton aria-label="delete">
                         <DeleteIcon />
                     </IconButton>
                 </Tooltip>
             ) : (
-                <Tooltip title="Filter list">
-                    <IconButton aria-label="filter list">
-                        <FilterListIcon />
-                    </IconButton>
-                </Tooltip>
-            )}*/}
-            <Tooltip title="Add One Item">
+                <div></div>
+            )}
+            {/*<Tooltip title="Add One Item">
                 <IconButton aria-label="filter list" onClick={onAddItem}>
                     <AddIcon />
                 </IconButton>
-            </Tooltip>
+            </Tooltip>*/}
         </Toolbar>
     );
 };
@@ -242,16 +238,16 @@ const useStyles = makeStyles((theme) => ({
         margin: 0
     }
 }));
-AddTable.defaultProps={
+EditTable.defaultProps={
     dense:false,
     selectable:false,
     rowsPerPage:5,
     isHeader:true,
     rows:[{name:'',description:'',key_words:[]}],
-    status:{msg:"", state:0},
+    status:{msg:"Please Edit Categories", state:0},
     handleUpdateRows:null
 }
-function AddTable(props) {
+function EditTable(props) {
     const classes = useStyles();
     const [order, setOrder] = React.useState('asc');
     const [status, setStatus] = React.useState(props.status);
@@ -263,8 +259,8 @@ function AddTable(props) {
     const [rowsPerPage, setRowsPerPage] = React.useState(props.rowsPerPage);
     const [rows, setRows] = React.useState(props.rows);
     React.useEffect(() => {
-        setRows(props.rows);
-        setStatus(props.staus);
+        // setRows(props.rows);
+        setStatus(props.status)
     }, [props])
     const handleRequestSort = (event, property) => {
         const isAsc = orderBy === property && order === 'asc';
@@ -281,12 +277,12 @@ function AddTable(props) {
         setSelected([]);
     };
 
-    const handleClick = (event, name) => {
-        const selectedIndex = selected.indexOf(name);
+    const handleClick = (event, row) => {
+        const selectedIndex = selected.findIndex(x=>x.id==row.id);
         let newSelected = [];
 
         if (selectedIndex === -1) {
-            newSelected = newSelected.concat(selected, name);
+            newSelected = newSelected.concat(selected, row);
         } else if (selectedIndex === 0) {
             newSelected = newSelected.concat(selected.slice(1));
         } else if (selectedIndex === selected.length - 1) {
@@ -316,14 +312,12 @@ function AddTable(props) {
     const handleAddItem = (event) => {
         let temp=Object.assign([],rows);
         temp.push({name:'',description:'',key_words:[]})
-        setStatus({
-            msg: "",
-            state:0
-        })
         setRows(temp)
     };
 
-    const isSelected = (name) => selected.indexOf(name) !== -1;
+    const isSelected = (id) => {
+        return selected.findIndex(x=>x.id==id)!==-1
+    };
 
     const emptyRows = rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
     const getKeyWords=(key_words)=>{
@@ -339,7 +333,7 @@ function AddTable(props) {
             {
                 props.isHeader&&
                 <EnhancedTableToolbar numSelected={selected.length}
-                message={status.msg}
+                                      message={status.msg}
                                       onAddItem={handleAddItem} />
             }
             <Paper className={classes.paper}>
@@ -354,7 +348,6 @@ function AddTable(props) {
                         <EnhancedTableHead
                             classes={classes}
                             numSelected={selected.length}
-
                             order={order}
                             orderBy={orderBy}
                             onSelectAllClick={handleSelectAllClick}
@@ -365,7 +358,7 @@ function AddTable(props) {
                             {stableSort(rows, getComparator(order, orderBy))
                                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                 .map((row, index) => {
-                                    const isItemSelected = isSelected(row.name);
+                                    const isItemSelected = isSelected(row.id);
                                     const labelId = `enhanced-table-checkbox-${index}`;
 
                                     return (
@@ -381,7 +374,7 @@ function AddTable(props) {
                                                 selectable&&
                                                 <TableCell padding="checkbox"  padding="none">
                                                     <Checkbox
-                                                        onClick={(event) => handleClick(event, row.name)}
+                                                        onClick={(event) => handleClick(event, row)}
                                                         checked={isItemSelected}
                                                         inputProps={{ 'aria-labelledby': labelId }}
                                                     />
@@ -399,7 +392,6 @@ function AddTable(props) {
                                                         let temp=Object.assign([],rows)
                                                         temp[index].name=event.target.value
                                                         setRows(temp)
-                                                        setStatus({msg: "", state:0})
                                                     }}
                                                     value={row.name||''}
                                                 />
@@ -426,21 +418,21 @@ function AddTable(props) {
                                                 <Paper component="ul" className={classes.paper}>
                                                     {
                                                         getKeyWords(row.key_words).map((key_word,key_index) => {
-                                                        return (
-                                                            <li key={key_index}>
-                                                                <Chip
-                                                                    label={key_word}
-                                                                    onDelete={()=>{
-                                                                        let temp=Object.assign([],rows)
-                                                                        temp[index].key_words.splice(key_index,1)
-                                                                        setRows(temp)
-                                                                        setStatus({msg: "", state:0})
-                                                                    }}
-                                                                    className={classes.chip}
-                                                                />
-                                                            </li>
-                                                        );
-                                                    })}
+                                                            return (
+                                                                <li key={key_index}>
+                                                                    <Chip
+                                                                        label={key_word}
+                                                                        onDelete={()=>{
+                                                                            let temp=Object.assign([],rows)
+                                                                            temp[index].key_words.splice(key_index,1)
+                                                                            setRows(temp)
+                                                                            setStatus({msg: "", state:0})
+                                                                        }}
+                                                                        className={classes.chip}
+                                                                    />
+                                                                </li>
+                                                            );
+                                                        })}
                                                     <TextField
                                                         variant="outlined"
                                                         color="secondary"
@@ -491,12 +483,12 @@ function AddTable(props) {
                 />*/}
                 {
                     status.state==0&&<Button variant="outlined"
-                            onClick={()=>{
-                                setStatus({
-                                    msg: "Confirm your Category Addition",
-                                    state:1
-                                })
-                            }}
+                                             onClick={()=>{
+                                                 setStatus({
+                                                     msg: "Confirm your Category Update",
+                                                     state:1
+                                                 })
+                                             }}
                     >
                         Submit
                     </Button>
@@ -506,10 +498,6 @@ function AddTable(props) {
                     <div>
                         <Button variant="outlined"
                                 onClick={()=>{
-                                    /*setStatus({
-                                        msg: "Added successfully",
-                                        state:3
-                                    })*/
                                     props.handleUpdateRows(rows)
                                 }}
                                 style={{marginRight:'50px'}}
@@ -519,7 +507,7 @@ function AddTable(props) {
                         <Button variant="outlined"
                                 onClick={()=>{
                                     setStatus({
-                                        msg: "",
+                                        msg: "0",
                                         state:0
                                     })
                                 }}
@@ -533,4 +521,4 @@ function AddTable(props) {
     );
 }
 
-export default AddTable
+export default EditTable

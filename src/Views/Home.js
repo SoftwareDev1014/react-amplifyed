@@ -36,10 +36,11 @@ const useStyles = makeStyles((theme) => ({
 function Home() {
     const classes = useStyles();
     const [formState, setFormState] = useState(initialState)
-    const [categories, setCategories] = useState([])
-    useEffect(() => {
+    const [status, setStatus] = React.useState({msg:"", state:0});
+    const [categories, setCategories] = useState([{name:"",description:"",key_words:[]}])
+    /*useEffect(() => {
         readCategories()
-    }, [])
+    }, [])*/
     async function readCategories() {
         try {
             const result = await API.graphql(graphqlOperation(listCategorys))
@@ -57,6 +58,22 @@ function Home() {
         } catch (err) {
             console.log('error creating todo:', err)
         }
+    }
+    const addCategories= async (rows) => {
+        console.log('rows',rows)
+        setStatus({msg:"Creating these categories to DB", state: 3})
+        let s_count=0;
+        for (const input_data of rows) {
+            try {
+                let result=await API.graphql(graphqlOperation(createCategory, {input: input_data}))
+                console.log('result',result)
+                s_count++;
+            } catch (err) {
+                console.log('error creating todo:', err)
+            }
+        }
+        setCategories([{name:"",description:"",key_words:[]}])
+        setStatus({msg:`Created ${s_count} categories, Failed Count:${rows.length-s_count}`, state: 3})
     }
     const handleDelete= async (data) => {
         try {
@@ -98,7 +115,7 @@ function Home() {
             </div>
             <br/>
 
-            <AddTable rows={categories}/>
+            <AddTable rows={categories} handleAddRows={addCategories} staus={status}/>
             {/*<form onSubmit={addCategory}>
                 <div style={{textAlign: 'left'}}>
                     <div className="headline">Enter Category Name</div>

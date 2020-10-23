@@ -14,7 +14,8 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Slide from '@material-ui/core/Slide';
-import {deleteCategory, updateCategory} from "../graphql/mutations";
+import {createCategory, updateCategory} from "../graphql/mutations";
+import EditTable from "../Componetns/EditTable";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -45,6 +46,8 @@ function CategoryEdit() {
     const [formState, setFormState] = useState(initialState)
     const [isDlg, setIsDlg] = useState(false)
     const [categories, setCategories] = useState([])
+    const [status, setStatus] = React.useState({msg:"", state:0});
+
     useEffect(() => {
         readCategories()
     }, [])
@@ -52,6 +55,7 @@ function CategoryEdit() {
         try {
             const result = await API.graphql(graphqlOperation(listCategorys))
             setCategories(result.data.listCategorys.items)
+            localStorage.categories=JSON.stringify(result.data.listCategorys.items)
         } catch (err) { console.log('error fetching todos') }
     }
     const handleSubmit= async (event) => {
@@ -69,6 +73,30 @@ function CategoryEdit() {
             console.log('error creating todo:', err)
         }
         setIsDlg(false)
+    }
+    const submitUpdateCategories=async (rows) => {
+        setStatus({msg:"Updating these categories to DB", state: 3})
+        let s_count=0;
+        let o_categories=JSON.parse(localStorage.categories)
+        for (const input_data of rows) {
+            let index=o_categories.findIndex(x=>x.id==input_data.id)
+            if (index==-1)continue
+            if (JSON.stringify(o_categories[index])==JSON.stringify(input_data))continue
+            try {
+                delete input_data.createdAt
+                delete input_data.updatedAt
+                let result=await API.graphql(graphqlOperation(updateCategory, {input: input_data}))
+                let temp = Object.assign([], categories)
+                let index = temp.findIndex(x => x.id == formState.id)
+                temp[index]=result.data.updateCategory
+                setCategories(temp)
+                s_count++;
+            } catch (err) {
+                console.log('error creating todo:', err)
+            }
+        }
+
+        setStatus({msg:`Updated ${s_count} categories, Total Count:${rows.length-s_count}`, state: 0})
     }
     const getOriginalName=()=>{
         let index=categories.findIndex(x=>x.id===formState.id)
@@ -152,7 +180,8 @@ function CategoryEdit() {
                     </div>
                 </div>
             </div>
-            <Paper elevation={3} className="mt_20 p20">
+            <EditTable key={categories.length} rows={categories} handleUpdateRows={submitUpdateCategories} status={status}/>
+            {/*<Paper elevation={3} className="mt_20 p20">
                 {categories.map((data) => {
                     return (
                         <Chip
@@ -165,7 +194,7 @@ function CategoryEdit() {
                         />
                     );
                 })}
-            </Paper>
+            </Paper>*/}
         </div>
     );
 }

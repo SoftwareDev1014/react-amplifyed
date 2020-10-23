@@ -15,6 +15,7 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Slide from '@material-ui/core/Slide';
 import {deleteCategory, updateCategory} from "../graphql/mutations";
+import DeleteTable from "../Componetns/DeleteTable";
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -46,6 +47,7 @@ export default function DeleteCategory() {
     const [formState, setFormState] = useState(initialState)
     const [isDlg, setIsDlg] = useState(false)
     const [categories, setCategories] = useState([])
+    const [status, setStatus] = React.useState({msg:"", state:0});
     useEffect(() => {
         readCategories()
     }, [])
@@ -55,21 +57,21 @@ export default function DeleteCategory() {
             setCategories(result.data.listCategorys.items)
         } catch (err) { console.log('error fetching todos') }
     }
-    const handleSubmit= async (event) => {
-        event.preventDefault()
-        try {
-            const input_data = {...formState}
-            console.log(input_data)
-            let result=await API.graphql(graphqlOperation(updateCategory, {input: input_data}))
-            let temp = Object.assign([], categories)
-            let index = temp.findIndex(x => x.id == formState.id)
-            temp[index]=result.data.updateCategory
-            setCategories(temp)
-
-        } catch (err) {
-            console.log('error creating todo:', err)
+    const submitDeleteCategories= async (rows) => {
+        setStatus({msg:"Deleting these categories to DB", state: 3})
+        let s_count=0;
+        for (const row of rows) {
+            let input_data={id:row}
+            try {
+                await API.graphql(graphqlOperation(deleteCategory, {input: input_data}))
+                Object.assign([], categories)
+                s_count++;
+            } catch (err) {
+                console.log('error creating todo:', err)
+            }
         }
-        setIsDlg(false)
+        readCategories()
+        setStatus({msg:`Deleted : ${s_count}`, state: 0})
     }
     const getOriginalName=()=>{
         let index=categories.findIndex(x=>x.id===formState.id)
@@ -83,55 +85,6 @@ export default function DeleteCategory() {
     }
     return (
         <div >
-            <Dialog
-                open={isDlg}
-                TransitionComponent={Transition}
-                keepMounted
-                onClose={()=>{setIsDlg(false)}}
-                aria-labelledby="alert-dialog-slide-title"
-                aria-describedby="alert-dialog-slide-description"
-            >
-                <DialogTitle id="alert-dialog-slide-title" >
-                    <div style={{fontSize:'30px',color:'grey'}}>
-                        MODIFY CATEGORY: {getOriginalName()}
-                    </div>
-                </DialogTitle>
-                <form onSubmit={handleSubmit}>
-                    <DialogContent>
-                        <div style={{textAlign: 'left'}}>
-                            <div style={{color:'grey',fontSize:'14px',marginBottom:'40px'}}>
-                                TYPE NEW CATEGORY NAME
-                            </div>
-                            <TextField
-                                id="outlined-secondary"
-                                variant="outlined"
-                                color="secondary"
-                                required
-                                onChange={(event)=>{
-                                    let temp={
-                                        id:formState.id,
-                                        name:event.target.value
-                                    }
-                                    setFormState(temp)
-                                }}
-                                value={formState.name}
-                            />
-                        </div>
-                    </DialogContent>
-                    <DialogActions>
-                        <div className="right">
-                            <Button variant="outlined" style={{borderRadius: "50px"}}
-                                    type={'submit'}
-                            >
-                                Submit
-                            </Button>
-                        </div>
-                    </DialogActions>
-
-
-                </form>
-
-            </Dialog>
             <div>
                 <div className={'headline'}>
                     Delete Category
@@ -154,8 +107,8 @@ export default function DeleteCategory() {
                     </div>
                 </div>
             </div>
-
-            <Paper elevation={3} className="mt_20 p20">
+            <DeleteTable rows={categories} staus={status} selectable handleDeleteRows={submitDeleteCategories}/>
+            {/*<Paper elevation={3} className="mt_20 p20">
                 {categories.map((data) => {
                     return (
                         <Chip
@@ -168,7 +121,7 @@ export default function DeleteCategory() {
                         />
                     );
                 })}
-            </Paper>
+            </Paper>*/}
         </div>
     );
 };

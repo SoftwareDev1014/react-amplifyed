@@ -29,22 +29,6 @@ function createData(name, calories, fat, carbs, protein) {
     return { name, calories, fat, carbs, protein };
 }
 
-const init_rows = [
-    createData('Cupcake', 305, 3.7, 67, 4.3),
-    createData('Donut', 452, 25.0, 51, 4.9),
-    createData('Eclair', 262, 16.0, 24, 6.0),
-    createData('Frozen yoghurt', 159, 6.0, 24, 4.0),
-    createData('Gingerbread', 356, 16.0, 49, 3.9),
-    createData('Honeycomb', 408, 3.2, 87, 6.5),
-    createData('Ice cream sandwich', 237, 9.0, 37, 4.3),
-    createData('Jelly Bean', 375, 0.0, 94, 0.0),
-    createData('KitKat', 518, 26.0, 65, 7.0),
-    createData('Lollipop', 392, 0.2, 98, 0.0),
-    createData('Marshmallow', 318, 0, 81, 2.0),
-    createData('Nougat', 360, 19.0, 9, 37.0),
-    createData('Oreo', 437, 18.0, 63, 4.0),
-];
-
 function descendingComparator(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) {
         return -1;
@@ -82,7 +66,7 @@ function EnhancedTableHead(props) {
     const createSortHandler = (property) => (event) => {
         onRequestSort(event, property);
     };
-    const [selectable, setSelectable] = React.useState(false);
+    const [selectable, setSelectable] = React.useState(props.selectable);
     return (
         <TableHead >
             <TableRow style={{backgroundColor:'lightgrey'}}>
@@ -174,7 +158,7 @@ const EnhancedTableToolbar = (props) => {
         >
             {numSelected > 0 ? (
                 <Typography className={classes.title} color="inherit" variant="subtitle1" component="div">
-                    {numSelected} selected
+                    {message}
                 </Typography>
             ) : (
                 <Typography className={classes.title} variant="h6" id="tableTitle" component="div">
@@ -182,7 +166,7 @@ const EnhancedTableToolbar = (props) => {
                 </Typography>
             )}
 
-            {/*{numSelected > 0 ? (
+            {numSelected > 0 ? (
                 <Tooltip title="Delete">
                     <IconButton aria-label="delete">
                         <DeleteIcon />
@@ -194,12 +178,7 @@ const EnhancedTableToolbar = (props) => {
                         <FilterListIcon />
                     </IconButton>
                 </Tooltip>
-            )}*/}
-            <Tooltip title="Add One Item">
-                <IconButton aria-label="filter list" onClick={onAddItem}>
-                    <AddIcon />
-                </IconButton>
-            </Tooltip>
+            )}
         </Toolbar>
     );
 };
@@ -238,20 +217,19 @@ const useStyles = makeStyles((theme) => ({
         justifyContent: 'start',
         flexWrap: 'wrap',
         listStyle: 'none',
-        padding: theme.spacing(0.5),
         margin: 0
     }
 }));
-AddTable.defaultProps={
+DeleteTable.defaultProps={
     dense:false,
     selectable:false,
     rowsPerPage:5,
     isHeader:true,
     rows:[{name:'',description:'',key_words:[]}],
     status:{msg:"", state:0},
-    handleUpdateRows:null
+    handleDeleteRows:null
 }
-function AddTable(props) {
+function DeleteTable(props) {
     const classes = useStyles();
     const [order, setOrder] = React.useState('asc');
     const [status, setStatus] = React.useState(props.status);
@@ -274,19 +252,19 @@ function AddTable(props) {
 
     const handleSelectAllClick = (event) => {
         if (event.target.checked) {
-            const newSelecteds = rows.map((n) => n.name);
+            const newSelecteds = rows.map((n) => n.id);
             setSelected(newSelecteds);
             return;
         }
         setSelected([]);
     };
 
-    const handleClick = (event, name) => {
-        const selectedIndex = selected.indexOf(name);
+    const handleClick = (event, id) => {
+        const selectedIndex = selected.indexOf(id);
         let newSelected = [];
 
         if (selectedIndex === -1) {
-            newSelected = newSelected.concat(selected, name);
+            newSelected = newSelected.concat(selected, id);
         } else if (selectedIndex === 0) {
             newSelected = newSelected.concat(selected.slice(1));
         } else if (selectedIndex === selected.length - 1) {
@@ -323,7 +301,7 @@ function AddTable(props) {
         setRows(temp)
     };
 
-    const isSelected = (name) => selected.indexOf(name) !== -1;
+    const isSelected = (id) => selected.indexOf(id) !== -1;
 
     const emptyRows = rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
     const getKeyWords=(key_words)=>{
@@ -339,7 +317,8 @@ function AddTable(props) {
             {
                 props.isHeader&&
                 <EnhancedTableToolbar numSelected={selected.length}
-                message={status.msg}
+
+                                      message={status.msg}
                                       onAddItem={handleAddItem} />
             }
             <Paper className={classes.paper}>
@@ -354,7 +333,7 @@ function AddTable(props) {
                         <EnhancedTableHead
                             classes={classes}
                             numSelected={selected.length}
-
+                            selectable={props.selectable}
                             order={order}
                             orderBy={orderBy}
                             onSelectAllClick={handleSelectAllClick}
@@ -365,7 +344,7 @@ function AddTable(props) {
                             {stableSort(rows, getComparator(order, orderBy))
                                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                                 .map((row, index) => {
-                                    const isItemSelected = isSelected(row.name);
+                                    const isItemSelected = isSelected(row.id);
                                     const labelId = `enhanced-table-checkbox-${index}`;
 
                                     return (
@@ -381,85 +360,31 @@ function AddTable(props) {
                                                 selectable&&
                                                 <TableCell padding="checkbox"  padding="none">
                                                     <Checkbox
-                                                        onClick={(event) => handleClick(event, row.name)}
+                                                        onClick={(event) => handleClick(event, row.id)}
                                                         checked={isItemSelected}
                                                         inputProps={{ 'aria-labelledby': labelId }}
                                                     />
                                                 </TableCell>
                                             }
-                                            <TableCell component="th" id={labelId} scope="row" padding="none">
-                                                <TextField
-                                                    id="outlined-secondary"
-                                                    variant="outlined"
-                                                    color="secondary"
-                                                    required
-                                                    size="small"
-                                                    style={{width:'100%'}}
-                                                    onChange={(event)=>{
-                                                        let temp=Object.assign([],rows)
-                                                        temp[index].name=event.target.value
-                                                        setRows(temp)
-                                                        setStatus({msg: "", state:0})
-                                                    }}
-                                                    value={row.name||''}
-                                                />
+                                            <TableCell component="th" id={labelId} scope="row">
+                                                {row.name}
                                             </TableCell>
-                                            <TableCell align="left" padding="none" style={{padding:'0 3px'}}>
-                                                <TextField
-                                                    id="outlined-secondary"
-                                                    variant="outlined"
-                                                    color="secondary"
-                                                    multiline
-                                                    size="small"
-                                                    style={{width:'100%'}}
-                                                    onChange={(event)=>{
-                                                        let temp=Object.assign([],rows)
-                                                        temp[index].description=event.target.value
-                                                        setRows(temp)
-                                                        setStatus({msg: "", state:0})
-                                                    }}
-                                                    value={row.description||''}
-                                                />
-
+                                            <TableCell align="left" >
+                                                {row.description}
                                             </TableCell>
                                             <TableCell align="left" padding="none">
-                                                <Paper component="ul" className={classes.paper}>
+                                                <Paper elevation={0} component="ul" className={classes.paper}>
                                                     {
                                                         getKeyWords(row.key_words).map((key_word,key_index) => {
-                                                        return (
-                                                            <li key={key_index}>
-                                                                <Chip
-                                                                    label={key_word}
-                                                                    onDelete={()=>{
-                                                                        let temp=Object.assign([],rows)
-                                                                        temp[index].key_words.splice(key_index,1)
-                                                                        setRows(temp)
-                                                                        setStatus({msg: "", state:0})
-                                                                    }}
-                                                                    className={classes.chip}
-                                                                />
-                                                            </li>
-                                                        );
-                                                    })}
-                                                    <TextField
-                                                        variant="outlined"
-                                                        color="secondary"
-                                                        size="small"
-                                                        style={{width:'100px'}}
-                                                        onKeyDown={(event)=>{
-                                                            if (event.key=='Enter' && event.target.value!==''){
-                                                                let temp=Object.assign([],rows)
-                                                                if (!temp[index].key_words){
-                                                                    temp[index].key_words=[]
-                                                                }
-                                                                temp[index].key_words.push(event.target.value)
-                                                                setRows(temp)
-                                                                event.target.value=''
-                                                                setStatus({msg: "", state:0})
-                                                            }
-
-                                                        }}
-                                                    />
+                                                            return (
+                                                                <li key={key_index}>
+                                                                    <Chip
+                                                                        label={key_word}
+                                                                        className={classes.chip}
+                                                                    />
+                                                                </li>
+                                                            );
+                                                        })}
                                                 </Paper>
 
                                             </TableCell>
@@ -491,12 +416,12 @@ function AddTable(props) {
                 />*/}
                 {
                     status.state==0&&<Button variant="outlined"
-                            onClick={()=>{
-                                setStatus({
-                                    msg: "Confirm your Category Addition",
-                                    state:1
-                                })
-                            }}
+                                             onClick={()=>{
+                                                 setStatus({
+                                                     msg: "Confirm your Category Deletection",
+                                                     state:1
+                                                 })
+                                             }}
                     >
                         Submit
                     </Button>
@@ -510,7 +435,8 @@ function AddTable(props) {
                                         msg: "Added successfully",
                                         state:3
                                     })*/
-                                    props.handleUpdateRows(rows)
+                                    console.log(selected)
+                                    props.handleDeleteRows(selected)
                                 }}
                                 style={{marginRight:'50px'}}
                         >
@@ -533,4 +459,4 @@ function AddTable(props) {
     );
 }
 
-export default AddTable
+export default DeleteTable
