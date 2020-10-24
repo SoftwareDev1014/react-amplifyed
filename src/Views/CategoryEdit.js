@@ -110,55 +110,7 @@ function CategoryEdit() {
     }
     return (
         <div >
-            <Dialog
-                open={isDlg}
-                TransitionComponent={Transition}
-                keepMounted
-                onClose={()=>{setIsDlg(false)}}
-                aria-labelledby="alert-dialog-slide-title"
-                aria-describedby="alert-dialog-slide-description"
-            >
-                <DialogTitle id="alert-dialog-slide-title" >
-                    <div style={{fontSize:'30px',color:'grey'}}>
-                        MODIFY CATEGORY: {getOriginalName()}
-                    </div>
-                </DialogTitle>
-                <form onSubmit={handleSubmit}>
-                    <DialogContent>
-                        <div style={{textAlign: 'left'}}>
-                            <div style={{color:'grey',fontSize:'14px',marginBottom:'40px'}}>
-                                TYPE NEW CATEGORY NAME
-                            </div>
-                            <TextField
-                                id="outlined-secondary"
-                                variant="outlined"
-                                color="secondary"
-                                required
-                                onChange={(event)=>{
-                                    let temp={
-                                        id:formState.id,
-                                        name:event.target.value
-                                    }
-                                    setFormState(temp)
-                                }}
-                                value={formState.name}
-                            />
-                        </div>
-                    </DialogContent>
-                    <DialogActions>
-                        <div className="right">
-                            <Button variant="outlined" style={{borderRadius: "50px"}}
-                                    type={'submit'}
-                            >
-                                Submit
-                            </Button>
-                        </div>
-                    </DialogActions>
 
-
-                </form>
-
-            </Dialog>
             <div>
                 <div className={'headline'}>
                     Edit Existing Category

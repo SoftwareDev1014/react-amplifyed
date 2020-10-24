@@ -17,33 +17,23 @@ import Paper from '@material-ui/core/Paper';
 import Checkbox from '@material-ui/core/Checkbox';
 import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Switch from '@material-ui/core/Switch';
-import DeleteIcon from '@material-ui/icons/Delete';
-import FilterListIcon from '@material-ui/icons/FilterList';
+import EyeIcon from '@material-ui/icons/Visibility';
+import DownloadIcon from '@material-ui/icons/CloudDownload';
+import UploadIcon from '@material-ui/icons/Backup';
+import Popover from '@material-ui/core/Popover';
 import AddIcon from '@material-ui/icons/Add';
-import Chip from '@material-ui/core/Chip';
-import {Link} from "react-router-dom";
 import Button from "@material-ui/core/Button";
+import Amplify, { Auth, Storage } from 'aws-amplify';
+import DialogTitle from "@material-ui/core/DialogTitle";
+import DialogContent from "@material-ui/core/DialogContent";
+import DialogActions from "@material-ui/core/DialogActions";
+import Dialog from "@material-ui/core/Dialog";
+import Slide from "@material-ui/core/Slide";
+
+
 function createData(name, calories, fat, carbs, protein) {
     return { name, calories, fat, carbs, protein };
 }
-
-const init_rows = [
-    createData('Cupcake', 305, 3.7, 67, 4.3),
-    createData('Donut', 452, 25.0, 51, 4.9),
-    createData('Eclair', 262, 16.0, 24, 6.0),
-    createData('Frozen yoghurt', 159, 6.0, 24, 4.0),
-    createData('Gingerbread', 356, 16.0, 49, 3.9),
-    createData('Honeycomb', 408, 3.2, 87, 6.5),
-    createData('Ice cream sandwich', 237, 9.0, 37, 4.3),
-    createData('Jelly Bean', 375, 0.0, 94, 0.0),
-    createData('KitKat', 518, 26.0, 65, 7.0),
-    createData('Lollipop', 392, 0.2, 98, 0.0),
-    createData('Marshmallow', 318, 0, 81, 2.0),
-    createData('Nougat', 360, 19.0, 9, 37.0),
-    createData('Oreo', 437, 18.0, 63, 4.0),
-];
 
 function descendingComparator(a, b, orderBy) {
     if (b[orderBy] < a[orderBy]) {
@@ -75,6 +65,7 @@ const headCells = [
     { id: 'name', numeric: false, disablePadding: false, label: 'Category Name',width:'140px' },
     { id: 'description', numeric: false, disablePadding: false, label: 'Category Description',width:'180px' },
     { id: 'keywords', numeric: false, disablePadding: false, label: 'KeyWords/Phrases' },
+    { id: 'edit', numeric: false, disablePadding: false, label: 'Edit' },
 ];
 
 function EnhancedTableHead(props) {
@@ -162,6 +153,131 @@ const useToolbarStyles = makeStyles((theme) => ({
     },
 }));
 
+const KeyWordView=(props)=>{
+    const [anchorEl, setAnchorEl] = React.useState(null);
+    const [newCategory, setNewCategory] = React.useState(props.category);
+    const [status, setStatus] = React.useState({state:0,msg:''});
+    const open = Boolean(anchorEl);
+    const handleClick = (event) => {
+        setAnchorEl(event.currentTarget);
+    };
+    React.useEffect(() => {
+        setNewCategory(props.category);
+        // setStatus(props.staus);
+    }, [props])
+    return(
+        <div>
+            <IconButton aria-describedby={props.category.id}
+                        size="medium"
+                        onClick={handleClick}>
+                <EyeIcon fontSize="inherit" />
+            </IconButton>
+
+            <Popover
+                id={props.category.id}
+                open={open}
+                anchorEl={anchorEl}
+                onClose={()=>{
+                    setAnchorEl(null);
+                }}
+                anchorOrigin={{
+                    vertical: 'bottom',
+                    horizontal: 'center',
+                }}
+                transformOrigin={{
+                    vertical: 'top',
+                    horizontal: 'center',
+                }}
+            >
+                <Typography style={{padding:"10px"}} component={'div'}>
+                    <form
+                        onSubmit={(event)=>{
+                            event.preventDefault()
+                            setAnchorEl(null);
+                            console.log(newCategory)
+                            props.updateCategory(newCategory)
+                        }}
+                        style={{textAlign:"left"}}>
+                        <TextField variant={"outlined"}
+                                   size={"small"}
+                                   value={newCategory.categoryName}
+                                   onChange={(e)=>{
+                                       let temp=Object.assign({},newCategory)
+                                       temp.categoryName=e.target.value
+                                       setNewCategory(temp)
+                                   }}
+                                   required
+                                   label={"CategoryName"}/><br/><br/>
+                        <TextField variant={"outlined"}
+                                   size={"small"}
+                                   value={newCategory.description}
+                                   onChange={(e)=>{
+                                       let temp=Object.assign({},newCategory)
+                                       temp.description=e.target.value
+                                       setNewCategory(temp)
+                                   }}
+                                   label={"CategoryDescription"}/><br/><br/>
+                        <TextField variant={"outlined"}
+                                   size={"small"}
+                                   label={"KeyWords/Phrases"}
+                                   value={newCategory.key_words}
+                                   onChange={(e)=>{
+                                       let temp=Object.assign({},newCategory)
+                                       temp.key_words=e.target.value
+                                       setNewCategory(temp)
+                                   }}
+                                   rows={8}
+                                   multiline/>
+                        <div >
+                            {
+                                status.state==0&&
+                                <div style={{padding:"10px 0 0 0"}}>
+                                    <Button variant="outlined"
+                                            onClick={()=>{
+                                                setStatus({
+                                                    msg: "Confirm your Category Addition",
+                                                    state:1
+                                                })
+                                            }}
+                                    >
+                                        Submit
+                                    </Button>
+                                </div>
+                            }
+                            <div style={{padding:"10px 0 0 0"}}>
+                                {status.msg}
+                            </div>
+                            {
+                                status.state==1&&
+                                <div style={{padding:"10px 0 0 0"}}>
+                                    <Button variant="outlined"
+                                            type={"submit"}
+                                            style={{marginRight:'50px'}}
+                                    >
+                                        Confirm
+                                    </Button>
+                                    <Button variant="outlined"
+                                            onClick={()=>{
+                                                setStatus({
+                                                    msg: "",
+                                                    state:0
+                                                })
+                                                setAnchorEl(null);
+                                                setNewCategory(category_model)
+                                            }}
+                                    >
+                                        Cancel
+                                    </Button>
+                                </div>
+                            }
+                        </div>
+                    </form>
+
+                </Typography>
+            </Popover>
+        </div>
+    )
+}
 const EnhancedTableToolbar = (props) => {
     const classes = useToolbarStyles();
     const { numSelected,onAddItem, message } = props;
@@ -196,7 +312,9 @@ const EnhancedTableToolbar = (props) => {
                 </Tooltip>
             )}*/}
             <Tooltip title="Add One Item">
-                <IconButton aria-label="filter list" onClick={onAddItem}>
+                <IconButton aria-label="filter list" onClick={()=>{
+                    props.clickAddIcon(true)
+                }}>
                     <AddIcon />
                 </IconButton>
             </Tooltip>
@@ -207,7 +325,48 @@ const EnhancedTableToolbar = (props) => {
 EnhancedTableToolbar.propTypes = {
     numSelected: PropTypes.number.isRequired,
 };
+const FileInput=(props)=>{
+    let fileInput=null
+    const handleChangeInputFile= async (event) => {
+        //console.log(event.target.files)
+        let file_key=props.id+'.txt'
+        let file = event.target.files[0]
+        let reader = new FileReader();
+        await reader.readAsText(file, "UTF-8")
+        reader.onload = function (evt) {
+            console.log(evt.target.result)
+            let content=evt.target.result
+            props.updateData(content)
+            Storage.put(file_key, content)
+                .then (result => console.log(result)) // {key: "test.txt"}
+                .catch(err => console.log(err));
+        }
+        reader.onerror = function (evt) {
+            document.getElementById("fileContents").innerHTML = "error reading file";
+        }
+        console.log(reader)
 
+    }
+    return(
+        <div>
+            <input type="file"
+                   ref={input => fileInput = input}
+                   style={{display:"none"}}
+                   onChange={handleChangeInputFile}
+
+                   accept="text/plain"/>
+            <IconButton onClick={()=>{
+                fileInput.click()
+            }}>
+                <UploadIcon fontSize="inherit" />
+            </IconButton>
+        </div>
+    )
+}
+FileInput.defaultProps={
+    id:"",
+    updateData:null
+}
 const useStyles = makeStyles((theme) => ({
     root: {
         width: '100%',
@@ -249,11 +408,25 @@ AddTable.defaultProps={
     isHeader:true,
     rows:[{categoryName:'',description:'',key_words:[]}],
     status:{msg:"", state:0},
-    handleAddRows:null
+    handleAddRows:null,
+    handleDownload:null,
+    handleUpdateRows:null
 }
+let category_model={
+    categoryName: "",
+    description:"",
+    key_words: "",
+    key_word_file:""
+}
+const Transition = React.forwardRef(function Transition(props, ref) {
+    return <Slide direction="up" ref={ref} {...props} />;
+});
 function AddTable(props) {
+    let popupState=null
     const classes = useStyles();
     const [order, setOrder] = React.useState('asc');
+    const [isDlg, setIsDlg] = React.useState(false);
+    const [newCategory, setNewCategory] = React.useState(category_model);
     const [status, setStatus] = React.useState(props.status);
     const [orderBy, setOrderBy] = React.useState('calories');
     const [selected, setSelected] = React.useState([]);
@@ -322,25 +495,26 @@ function AddTable(props) {
         })
         setRows(temp)
     };
-
+    const handleDownload= async (key) => {
+        const signedURL = await Storage.get(key)
+        window.location.href=signedURL
+        console.log(signedURL)
+    }
     const isSelected = (categoryName) => selected.indexOf(categoryName) !== -1;
 
     const emptyRows = rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
-    const getKeyWords=(key_words)=>{
-        if (key_words){
-            return key_words
-        }
-        else{
-            return []
-        }
-    }
+
     return (
         <div className={classes.root}>
             {
                 props.isHeader&&
-                <EnhancedTableToolbar numSelected={selected.length}
-                message={status.msg}
-                                      onAddItem={handleAddItem} />
+                <EnhancedTableToolbar
+                    numSelected={selected.length}
+                    message={status.msg}
+                    clickAddIcon={(val)=>{
+                        setIsDlg(val)
+                    }}
+                    onAddItem={handleAddItem} />
             }
             <Paper className={classes.paper}>
 
@@ -387,81 +561,35 @@ function AddTable(props) {
                                                     />
                                                 </TableCell>
                                             }
-                                            <TableCell component="th" id={labelId} scope="row" padding="none">
-                                                <TextField
-                                                    id="outlined-secondary"
-                                                    variant="outlined"
-                                                    color="secondary"
-                                                    required
-                                                    size="small"
-                                                    style={{width:'100%'}}
-                                                    onChange={(event)=>{
-                                                        let temp=Object.assign([],rows)
-                                                        temp[index].categoryName=event.target.value
-                                                        setRows(temp)
-                                                        setStatus({msg: "", state:0})
-                                                    }}
-                                                    value={row.categoryName||''}
-                                                />
+                                            <TableCell component="th" id={labelId} scope="row">
+                                                {row.categoryName}
                                             </TableCell>
-                                            <TableCell align="left" padding="none" style={{padding:'0 3px'}}>
-                                                <TextField
-                                                    id="outlined-secondary"
-                                                    variant="outlined"
-                                                    color="secondary"
-                                                    multiline
-                                                    size="small"
-                                                    style={{width:'100%'}}
-                                                    onChange={(event)=>{
-                                                        let temp=Object.assign([],rows)
-                                                        temp[index].description=event.target.value
-                                                        setRows(temp)
-                                                        setStatus({msg: "", state:0})
-                                                    }}
-                                                    value={row.description||''}
-                                                />
+                                            <TableCell align="left">
+                                                {row.description}
 
                                             </TableCell>
                                             <TableCell align="left" padding="none">
-                                                <Paper component="ul" className={classes.paper}>
-                                                    {
-                                                        getKeyWords(row.key_words).map((key_word,key_index) => {
-                                                        return (
-                                                            <li key={key_index}>
-                                                                <Chip
-                                                                    label={key_word}
-                                                                    onDelete={()=>{
-                                                                        let temp=Object.assign([],rows)
-                                                                        temp[index].key_words.splice(key_index,1)
-                                                                        setRows(temp)
-                                                                        setStatus({msg: "", state:0})
-                                                                    }}
-                                                                    className={classes.chip}
-                                                                />
-                                                            </li>
-                                                        );
-                                                    })}
-                                                    <TextField
-                                                        variant="outlined"
-                                                        color="secondary"
-                                                        size="small"
-                                                        style={{width:'100px'}}
-                                                        onKeyDown={(event)=>{
-                                                            if (event.key=='Enter' && event.target.value!==''){
-                                                                let temp=Object.assign([],rows)
-                                                                if (!temp[index].key_words){
-                                                                    temp[index].key_words=[]
-                                                                }
-                                                                temp[index].key_words.push(event.target.value)
-                                                                setRows(temp)
-                                                                event.target.value=''
-                                                                setStatus({msg: "", state:0})
-                                                            }
-
-                                                        }}
-                                                    />
-                                                </Paper>
-
+                                                <KeyWordView category={row} updateCategory={(value)=>{
+                                                    //console.log(value)
+                                                    props.handleUpdateRows([value])
+                                                }} status={status}/>
+                                            </TableCell>
+                                            <TableCell align="left" padding="none">
+                                                <div style={{display:"flex"}}>
+                                                    <div>
+                                                        <IconButton onClick={()=>{
+                                                            handleDownload(row.id+'.txt')
+                                                        }}>
+                                                            <DownloadIcon fontSize="inherit" />
+                                                        </IconButton>
+                                                    </div>
+                                                    <FileInput id={row.id} updateData={(val)=>{
+                                                        console.log(val)
+                                                        let temp=Object.assign([],rows)
+                                                        temp[index].key_words=val
+                                                        setRows(temp)
+                                                    }}/>
+                                                </div>
                                             </TableCell>
                                         </TableRow>
                                     );
@@ -484,51 +612,105 @@ function AddTable(props) {
                     onChangeRowsPerPage={handleChangeRowsPerPage}
                 />
             </Paper>
-            <div style={{marginTop:'20px'}}>
-                {/*<FormControlLabel
-                    control={<Switch checked={dense} onChange={handleChangeDense} />}
-                    label="Dense padding"
-                />*/}
-                {
-                    status.state==0&&<Button variant="outlined"
-                            onClick={()=>{
-                                setStatus({
-                                    msg: "Confirm your Category Addition",
-                                    state:1
-                                })
-                            }}
-                    >
-                        Submit
-                    </Button>
-                }
-                {
-                    status.state==1&&
-                    <div>
-                        <Button variant="outlined"
-                                onClick={()=>{
-                                    /*setStatus({
-                                        msg: "Added successfully",
-                                        state:3
-                                    })*/
-                                    props.handleAddRows(rows)
-                                }}
-                                style={{marginRight:'50px'}}
-                        >
-                            Confirm
-                        </Button>
-                        <Button variant="outlined"
-                                onClick={()=>{
-                                    setStatus({
-                                        msg: "",
-                                        state:0
-                                    })
-                                }}
-                        >
-                            Cancel
-                        </Button>
+            <br/>
+
+            <Dialog
+                open={isDlg}
+                TransitionComponent={Transition}
+                keepMounted
+                onClose={()=>{setIsDlg(false)}}
+                aria-labelledby="alert-dialog-slide-title"
+                aria-describedby="alert-dialog-slide-description"
+            >
+                <DialogTitle id="alert-dialog-slide-title" >
+                    <div style={{fontSize:'30px',color:'grey'}}>
+                        Create New Category
                     </div>
-                }
-            </div>
+                </DialogTitle>
+                <DialogContent>
+                    <form
+                        onSubmit={(event)=>{
+                            event.preventDefault()
+                            setIsDlg(false)
+                            props.handleAddRows([newCategory])
+                        }}
+                        style={{textAlign:"left"}}>
+                        <TextField variant={"outlined"}
+                                   size={"small"}
+                                   value={newCategory.categoryName}
+                                   onChange={(e)=>{
+                                       let temp=Object.assign({},newCategory)
+                                       temp.categoryName=e.target.value
+                                       setNewCategory(temp)
+                                   }}
+                                   required
+                                   label={"CategoryName"}/><br/><br/>
+                        <TextField variant={"outlined"}
+                                   size={"small"}
+                                   onChange={(e)=>{
+                                       let temp=Object.assign({},newCategory)
+                                       temp.description=e.target.value
+                                       setNewCategory(temp)
+                                   }}
+                                   label={"CategoryDescription"}/><br/><br/>
+                        <TextField variant={"outlined"}
+                                   size={"small"}
+                                   label={"KeyWords/Phrases"}
+                                   onChange={(e)=>{
+                                       let temp=Object.assign({},newCategory)
+                                       temp.key_words=e.target.value
+                                       setNewCategory(temp)
+                                   }}
+                                   rows={8}
+                                   multiline/>
+                        <div >
+                            {
+                                status.state==0&&
+                                <div style={{padding:"10px 0 0 0"}}>
+                                    <Button variant="outlined"
+                                            onClick={()=>{
+                                                setStatus({
+                                                    msg: "Confirm your Category Addition",
+                                                    state:1
+                                                })
+                                            }}
+                                    >
+                                        Submit
+                                    </Button>
+                                </div>
+                            }
+                            <div style={{padding:"10px 0 0 0"}}>
+                                {status.msg}
+                            </div>
+                            {
+                                status.state==1&&
+                                <div style={{padding:"10px 0 0 0"}}>
+                                    <Button variant="outlined"
+                                            type={"submit"}
+                                            style={{marginRight:'50px'}}
+                                    >
+                                        Confirm
+                                    </Button>
+                                    <Button variant="outlined"
+                                            onClick={()=>{
+                                                setStatus({
+                                                    msg: "",
+                                                    state:0
+                                                })
+                                                setIsDlg(false)
+                                                setNewCategory(category_model)
+                                            }}
+                                    >
+                                        Cancel
+                                    </Button>
+                                </div>
+                            }
+                        </div>
+                    </form>
+                </DialogContent>
+
+
+            </Dialog>
         </div>
     );
 }

@@ -2,13 +2,11 @@ import React, { useEffect, useState } from 'react';
 
 import {Link} from "react-router-dom";
 import Button from '@material-ui/core/Button';
-import TextField from '@material-ui/core/TextField';
-import Paper from '@material-ui/core/Paper';
-import Chip from '@material-ui/core/Chip';
 
-import { API, graphqlOperation } from 'aws-amplify'
+import { API, graphqlOperation,Storage  } from 'aws-amplify'
+import awsconfig from '../aws-exports';
 
-import {createCategory, deleteCategory} from '../graphql/mutations'
+import {createCategory, deleteCategory, updateCategory} from '../graphql/mutations'
 import { listCategorys } from '../graphql/queries'
 import { makeStyles } from '@material-ui/core/styles';
 import AddTable from "../Componetns/AddTable";
@@ -66,14 +64,50 @@ function Home() {
         for (const input_data of rows) {
             try {
                 let result=await API.graphql(graphqlOperation(createCategory, {input: input_data}))
+                let file_key=result.data.createCategory.id
+                Storage.put(file_key+'.txt', input_data.key_words)
+                    .then (result => console.log(result)) // {key: "test.txt"}
+                    .catch(err => console.log(err));
                 console.log('result',result)
                 s_count++;
             } catch (err) {
                 console.log('error creating todo:', err)
             }
         }
-        setCategories([{categoryName:"",description:"",key_words:[]}])
-        setStatus({msg:`Created ${s_count} categories, Failed Count:${rows.length-s_count}`, state: 3})
+        //setCategories([{categoryName:"",description:"",key_words:[]}])
+        readCategories()
+        setStatus({msg:`Created ${s_count} categories, Failed Count:${rows.length-s_count}`, state: 0})
+    }
+    const submitUpdateCategories=async (rows) => {
+        setStatus({msg:"Updating these categories to DB", state: 3})
+        let s_count=0;
+        let o_categories=JSON.parse(localStorage.categories)
+        let temp = Object.assign([], categories)
+        for (const input_data of rows) {
+            let index=o_categories.findIndex(x=>x.id==input_data.id)
+            if (index==-1)continue
+            if (JSON.stringify(o_categories[index])==JSON.stringify(input_data))continue
+            try {
+                delete input_data.createdAt
+                delete input_data.updatedAt
+                console.log('input_data',input_data)
+                let result=await API.graphql(graphqlOperation(updateCategory, {input: input_data}))
+
+                let index = temp.findIndex(x => x.id == input_data.id)
+                temp[index]=result.data.updateCategory
+                console.log(temp[index])
+                let file_key=input_data.id
+                Storage.put(file_key+'.txt', input_data.key_words)
+                    .then (result => console.log(result)) // {key: "test.txt"}
+                    .catch(err => console.log(err));
+                s_count++;
+            } catch (err) {
+                console.log('error creating todo:', err)
+            }
+        }
+        setCategories(temp)
+        // readCategories()
+        setStatus({msg:`Updated ${s_count} categories, Total Count:${rows.length-s_count}`, state: 0})
     }
     const handleDelete= async (data) => {
         try {
@@ -115,7 +149,7 @@ function Home() {
             </div>
             <br/>
 
-            <AddTable rows={categories} handleAddRows={addCategories} staus={status}/>
+            <AddTable rows={categories} handleAddRows={addCategories} handleUpdateRows={submitUpdateCategories} staus={status}/>
             {/*<form onSubmit={addCategory}>
                 <div style={{textAlign: 'left'}}>
                     <div className="headline">Enter Category Name</div>

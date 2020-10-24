@@ -25,6 +25,10 @@ import AddIcon from '@material-ui/icons/Add';
 import Chip from '@material-ui/core/Chip';
 import {Link} from "react-router-dom";
 import Button from "@material-ui/core/Button";
+import List from "@material-ui/core/List";
+import ListItem from "@material-ui/core/ListItem";
+import ListItemText from "@material-ui/core/ListItemText";
+import Divider from "@material-ui/core/Divider";
 function createData(name, calories, fat, carbs, protein) {
     return { name, calories, fat, carbs, protein };
 }
@@ -153,32 +157,14 @@ const EnhancedTableToolbar = (props) => {
     return (
         <Toolbar
             className={clsx(classes.root, {
-                [classes.highlight]: numSelected > 0,
+
             })}
         >
-            {numSelected > 0 ? (
-                <Typography className={classes.title} color="inherit" variant="subtitle1" component="div">
-                    {message}
-                </Typography>
-            ) : (
-                <Typography className={classes.title} variant="h6" id="tableTitle" component="div">
-                    {message}
-                </Typography>
-            )}
+            <Typography className={classes.title} variant="h6" id="tableTitle" component="div"
+                        dangerouslySetInnerHTML={{__html: message}}
+            >
 
-            {numSelected > 0 ? (
-                <Tooltip title="Delete">
-                    <IconButton aria-label="delete">
-                        <DeleteIcon />
-                    </IconButton>
-                </Tooltip>
-            ) : (
-                <Tooltip title="Filter list">
-                    <IconButton aria-label="filter list">
-                        <FilterListIcon />
-                    </IconButton>
-                </Tooltip>
-            )}
+            </Typography>
         </Toolbar>
     );
 };
@@ -217,7 +203,8 @@ const useStyles = makeStyles((theme) => ({
         justifyContent: 'start',
         flexWrap: 'wrap',
         listStyle: 'none',
-        margin: 0
+        margin: 0,
+        width:'100%'
     }
 }));
 DeleteTable.defaultProps={
@@ -259,23 +246,9 @@ function DeleteTable(props) {
         setSelected([]);
     };
 
-    const handleClick = (event, id) => {
-        const selectedIndex = selected.indexOf(id);
+    const handleClick = (event, row) => {
         let newSelected = [];
-
-        if (selectedIndex === -1) {
-            newSelected = newSelected.concat(selected, id);
-        } else if (selectedIndex === 0) {
-            newSelected = newSelected.concat(selected.slice(1));
-        } else if (selectedIndex === selected.length - 1) {
-            newSelected = newSelected.concat(selected.slice(0, -1));
-        } else if (selectedIndex > 0) {
-            newSelected = newSelected.concat(
-                selected.slice(0, selectedIndex),
-                selected.slice(selectedIndex + 1),
-            );
-        }
-
+        newSelected = [Object.assign({},row)];
         setSelected(newSelected);
     };
 
@@ -301,7 +274,9 @@ function DeleteTable(props) {
         setRows(temp)
     };
 
-    const isSelected = (id) => selected.indexOf(id) !== -1;
+    const isSelected = (id) => {
+        return selected.findIndex(x=>x.id==id)!==-1
+    };
 
     const emptyRows = rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
     const getKeyWords=(key_words)=>{
@@ -321,94 +296,31 @@ function DeleteTable(props) {
                                       message={status.msg}
                                       onAddItem={handleAddItem} />
             }
-            <Paper className={classes.paper}>
-
-                <TableContainer>
-                    <Table
-                        className={classes.table}
-                        aria-labelledby="tableTitle"
-                        size={dense ? 'small' : 'medium'}
-                        aria-label="enhanced table"
-                    >
-                        <EnhancedTableHead
-                            classes={classes}
-                            numSelected={selected.length}
-                            selectable={props.selectable}
-                            order={order}
-                            orderBy={orderBy}
-                            onSelectAllClick={handleSelectAllClick}
-                            onRequestSort={handleRequestSort}
-                            rowCount={rows.length}
-                        />
-                        <TableBody>
-                            {stableSort(rows, getComparator(order, orderBy))
-                                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                                .map((row, index) => {
-                                    const isItemSelected = isSelected(row.id);
-                                    const labelId = `enhanced-table-checkbox-${index}`;
-
-                                    return (
-                                        <TableRow
-                                            hover
-                                            role="checkbox"
-                                            aria-checked={isItemSelected}
-                                            tabIndex={-1}
-                                            key={index}
-                                            selected={isItemSelected}
+            {
+                status.state==0&&
+                <Paper className={classes.paper}>
+                    <Paper className={classes.paper}>
+                        <List aria-label="main mailbox folders" style={{width:"100%",height:"300px",overflowY:"scroll"}}>
+                            {
+                                rows.map((row,r_index)=>{
+                                    return(
+                                        <ListItem
+                                            key={row.id}
+                                            button
+                                            selected={isSelected(row.id)}
+                                            onClick={(event) => handleClick(event,row)}
                                         >
-                                            {
-                                                selectable&&
-                                                <TableCell padding="checkbox"  padding="none">
-                                                    <Checkbox
-                                                        onClick={(event) => handleClick(event, row.id)}
-                                                        checked={isItemSelected}
-                                                        inputProps={{ 'aria-labelledby': labelId }}
-                                                    />
-                                                </TableCell>
-                                            }
-                                            <TableCell component="th" id={labelId} scope="row">
-                                                {row.name}
-                                            </TableCell>
-                                            <TableCell align="left" >
-                                                {row.description}
-                                            </TableCell>
-                                            <TableCell align="left" padding="none">
-                                                <Paper elevation={0} component="ul" className={classes.paper}>
-                                                    {
-                                                        getKeyWords(row.key_words).map((key_word,key_index) => {
-                                                            return (
-                                                                <li key={key_index}>
-                                                                    <Chip
-                                                                        label={key_word}
-                                                                        className={classes.chip}
-                                                                    />
-                                                                </li>
-                                                            );
-                                                        })}
-                                                </Paper>
+                                            <ListItemText primary={row.categoryName} />
+                                            <Divider />
+                                        </ListItem>
+                                    )
+                                })
+                            }
 
-                                            </TableCell>
-                                        </TableRow>
-                                    );
-                                })}
-                            {emptyRows > 0 && (
-                                <TableRow style={{ height: (dense ? 33 : 53) * emptyRows }}>
-                                    <TableCell colSpan={6} />
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
-                <TablePagination
-                    rowsPerPageOptions={[5, 10, 25]}
-                    component="div"
-                    count={rows.length}
-                    rowsPerPage={rowsPerPage}
-                    page={page}
-                    onChangePage={handleChangePage}
-                    onChangeRowsPerPage={handleChangeRowsPerPage}
-                />
-            </Paper>
+                        </List>
+                    </Paper>
+                </Paper>
+            }
             <div style={{marginTop:'20px'}}>
                 {/*<FormControlLabel
                     control={<Switch checked={dense} onChange={handleChangeDense} />}
@@ -418,7 +330,8 @@ function DeleteTable(props) {
                     status.state==0&&<Button variant="outlined"
                                              onClick={()=>{
                                                  setStatus({
-                                                     msg: "Confirm your Category Deletection",
+                                                     msg: "Please confirm that you want to delete the following" +
+                                                         ` Category and all its Keywords and Phrases:<span style='color:blue'> ${selected[0].categoryName}</span>`,
                                                      state:1
                                                  })
                                              }}

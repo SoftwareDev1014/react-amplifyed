@@ -8,6 +8,7 @@ export const getCategory = /* GraphQL */ `
       categoryName
       description
       key_words
+      key_word_file
       createdAt
       updatedAt
     }
@@ -25,6 +26,7 @@ export const listCategorys = /* GraphQL */ `
         categoryName
         description
         key_words
+        key_word_file
         createdAt
         updatedAt
       }

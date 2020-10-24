@@ -11,6 +11,7 @@ export const createCategory = /* GraphQL */ `
       categoryName
       description
       key_words
+      key_word_file
       createdAt
       updatedAt
     }
@@ -26,6 +27,7 @@ export const updateCategory = /* GraphQL */ `
       categoryName
       description
       key_words
+      key_word_file
       createdAt
       updatedAt
     }
@@ -41,6 +43,7 @@ export const deleteCategory = /* GraphQL */ `
       categoryName
       description
       key_words
+      key_word_file
       createdAt
       updatedAt
     }

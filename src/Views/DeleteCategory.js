@@ -61,7 +61,7 @@ export default function DeleteCategory() {
         setStatus({msg:"Deleting these categories to DB", state: 3})
         let s_count=0;
         for (const row of rows) {
-            let input_data={id:row}
+            let input_data={id:row.id}
             try {
                 await API.graphql(graphqlOperation(deleteCategory, {input: input_data}))
                 Object.assign([], categories)
