@@ -27,8 +27,8 @@ const useStyles = makeStyles((theme) => ({
     },
     title: {
         display: 'none',
-        textAlign:'center',
-        width:'100%',
+        // textAlign:'center',
+        // width:'100%',
         [theme.breakpoints.up('sm')]: {
             display: 'block',
         },
