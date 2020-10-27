@@ -27,6 +27,8 @@ const useStyles = makeStyles((theme) => ({
     },
     title: {
         display: 'none',
+        textAlign:'center',
+        width:'100%',
         [theme.breakpoints.up('sm')]: {
             display: 'block',
         },
@@ -211,7 +213,7 @@ export default function Header() {
                             <AccountCircle />
                         </IconButton>
                     </div>*/}
-                    <div className={{/*classes.sectionMobile*/}}>
+                    {/*<div className={classes.sectionMobile}>
                         <IconButton
                             aria-label="show more"
                             aria-controls={mobileMenuId}
@@ -221,7 +223,7 @@ export default function Header() {
                         >
                             <MoreIcon />
                         </IconButton>
-                    </div>
+                    </div>*/}
                 </Toolbar>
             </AppBar>
             {renderMobileMenu}

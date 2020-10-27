@@ -110,6 +110,7 @@ function Home() {
         setStatus({msg:`Updated ${s_count} categories, Total Count:${rows.length-s_count}`, state: 0})
     }
     const handleDelete= async (data) => {
+        console.log(data)
         try {
             const input_data = {id:data.id}
             console.log(input_data)
@@ -119,14 +120,13 @@ function Home() {
             temp.splice(index,1)
             console.log(temp)
             setCategories(temp)
-
         } catch (err) {
             console.log('error creating todo:', err)
         }
     }
     return (
         <div className="App">
-            <div>
+            {/*<div>
                 <div className={'headline'}>
                     Create New Category
                 </div>
@@ -147,9 +147,13 @@ function Home() {
                     </div>
                 </div>
             </div>
-            <br/>
+            <br/>*/}
 
-            <AddTable rows={categories} handleAddRows={addCategories} handleUpdateRows={submitUpdateCategories} staus={status}/>
+            <AddTable rows={categories}
+                      handleAddRows={addCategories}
+                      handleUpdateRows={submitUpdateCategories}
+                      handleDelete={handleDelete}
+                      staus={status}/>
             {/*<form onSubmit={addCategory}>
                 <div style={{textAlign: 'left'}}>
                     <div className="headline">Enter Category Name</div>

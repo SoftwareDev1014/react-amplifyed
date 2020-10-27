@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
-import { lighten, makeStyles } from '@material-ui/core/styles';
+import {lighten, makeStyles} from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -16,6 +16,7 @@ import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 import Checkbox from '@material-ui/core/Checkbox';
 import IconButton from '@material-ui/core/IconButton';
+import DeleteIcon from '@material-ui/icons/Delete';
 import Tooltip from '@material-ui/core/Tooltip';
 import EyeIcon from '@material-ui/icons/Visibility';
 import DownloadIcon from '@material-ui/icons/CloudDownload';
@@ -23,7 +24,7 @@ import UploadIcon from '@material-ui/icons/Backup';
 import Popover from '@material-ui/core/Popover';
 import AddIcon from '@material-ui/icons/Add';
 import Button from "@material-ui/core/Button";
-import Amplify, { Auth, Storage } from 'aws-amplify';
+import Amplify, {Auth, Storage} from 'aws-amplify';
 import DialogTitle from "@material-ui/core/DialogTitle";
 import DialogContent from "@material-ui/core/DialogContent";
 import DialogActions from "@material-ui/core/DialogActions";
@@ -32,7 +33,7 @@ import Slide from "@material-ui/core/Slide";
 
 
 function createData(name, calories, fat, carbs, protein) {
-    return { name, calories, fat, carbs, protein };
+    return {name, calories, fat, carbs, protein};
 }
 
 function descendingComparator(a, b, orderBy) {
@@ -62,29 +63,30 @@ function stableSort(array, comparator) {
 }
 
 const headCells = [
-    { id: 'name', numeric: false, disablePadding: false, label: 'Category Name',width:'140px' },
-    { id: 'description', numeric: false, disablePadding: false, label: 'Category Description',width:'180px' },
-    { id: 'keywords', numeric: false, disablePadding: false, label: 'KeyWords/Phrases' },
-    { id: 'edit', numeric: false, disablePadding: false, label: 'Edit' },
+    {id: 'name', numeric: false, disablePadding: false, label: 'Category Name', width: '140px'},
+    {id: 'description', numeric: false, disablePadding: false, label: 'Category Description'},
+    {id: 'keywords', numeric: false, disablePadding: false, label: 'Edit Category', width: '50px'},
+    {id: 'edit', numeric: false, disablePadding: false, label: 'upload/download keyword files', width: '50px'},
+    {id: 'action', numeric: false, disablePadding: false, label: 'Delete', width: '50px'},
 ];
 
 function EnhancedTableHead(props) {
-    const { classes, onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort } = props;
+    const {classes, onSelectAllClick, order, orderBy, numSelected, rowCount, onRequestSort} = props;
     const createSortHandler = (property) => (event) => {
         onRequestSort(event, property);
     };
     const [selectable, setSelectable] = React.useState(false);
     return (
-        <TableHead >
-            <TableRow style={{backgroundColor:'lightgrey'}}>
+        <TableHead>
+            <TableRow style={{backgroundColor: 'lightgrey'}}>
                 {
-                    selectable&&
+                    selectable &&
                     <TableCell padding="none">
                         <Checkbox
                             indeterminate={numSelected > 0 && numSelected < rowCount}
                             checked={rowCount > 0 && numSelected === rowCount}
                             onChange={onSelectAllClick}
-                            inputProps={{ 'aria-label': 'select all desserts' }}
+                            inputProps={{'aria-label': 'select all desserts'}}
                         />
                     </TableCell>
                 }
@@ -153,10 +155,10 @@ const useToolbarStyles = makeStyles((theme) => ({
     },
 }));
 
-const KeyWordView=(props)=>{
+const KeyWordView = (props) => {
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [newCategory, setNewCategory] = React.useState(props.category);
-    const [status, setStatus] = React.useState({state:0,msg:''});
+    const [status, setStatus] = React.useState({state: 0, msg: ''});
     const open = Boolean(anchorEl);
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
@@ -165,19 +167,19 @@ const KeyWordView=(props)=>{
         setNewCategory(props.category);
         // setStatus(props.staus);
     }, [props])
-    return(
+    return (
         <div>
             <IconButton aria-describedby={props.category.id}
                         size="medium"
                         onClick={handleClick}>
-                <EyeIcon fontSize="inherit" />
+                <EyeIcon fontSize="inherit"/>
             </IconButton>
 
             <Popover
                 id={props.category.id}
                 open={open}
                 anchorEl={anchorEl}
-                onClose={()=>{
+                onClose={() => {
                     setAnchorEl(null);
                 }}
                 anchorOrigin={{
@@ -189,21 +191,21 @@ const KeyWordView=(props)=>{
                     horizontal: 'center',
                 }}
             >
-                <Typography style={{padding:"10px"}} component={'div'}>
+                <Typography style={{padding: "10px"}} component={'div'}>
                     <form
-                        onSubmit={(event)=>{
+                        onSubmit={(event) => {
                             event.preventDefault()
                             setAnchorEl(null);
                             console.log(newCategory)
                             props.updateCategory(newCategory)
                         }}
-                        style={{textAlign:"left"}}>
+                        style={{textAlign: "left"}}>
                         <TextField variant={"outlined"}
                                    size={"small"}
                                    value={newCategory.categoryName}
-                                   onChange={(e)=>{
-                                       let temp=Object.assign({},newCategory)
-                                       temp.categoryName=e.target.value
+                                   onChange={(e) => {
+                                       let temp = Object.assign({}, newCategory)
+                                       temp.categoryName = e.target.value
                                        setNewCategory(temp)
                                    }}
                                    required
@@ -211,9 +213,9 @@ const KeyWordView=(props)=>{
                         <TextField variant={"outlined"}
                                    size={"small"}
                                    value={newCategory.description}
-                                   onChange={(e)=>{
-                                       let temp=Object.assign({},newCategory)
-                                       temp.description=e.target.value
+                                   onChange={(e) => {
+                                       let temp = Object.assign({}, newCategory)
+                                       temp.description = e.target.value
                                        setNewCategory(temp)
                                    }}
                                    label={"CategoryDescription"}/><br/><br/>
@@ -221,22 +223,22 @@ const KeyWordView=(props)=>{
                                    size={"small"}
                                    label={"KeyWords/Phrases"}
                                    value={newCategory.key_words}
-                                   onChange={(e)=>{
-                                       let temp=Object.assign({},newCategory)
-                                       temp.key_words=e.target.value
+                                   onChange={(e) => {
+                                       let temp = Object.assign({}, newCategory)
+                                       temp.key_words = e.target.value
                                        setNewCategory(temp)
                                    }}
                                    rows={8}
                                    multiline/>
-                        <div >
+                        <div>
                             {
-                                status.state==0&&
-                                <div style={{padding:"10px 0 0 0"}}>
+                                status.state == 0 &&
+                                <div style={{padding: "10px 0 0 0"}}>
                                     <Button variant="outlined"
-                                            onClick={()=>{
+                                            onClick={() => {
                                                 setStatus({
                                                     msg: "Confirm your Category Addition",
-                                                    state:1
+                                                    state: 1
                                                 })
                                             }}
                                     >
@@ -244,23 +246,23 @@ const KeyWordView=(props)=>{
                                     </Button>
                                 </div>
                             }
-                            <div style={{padding:"10px 0 0 0"}}>
+                            <div style={{padding: "10px 0 0 0"}}>
                                 {status.msg}
                             </div>
                             {
-                                status.state==1&&
-                                <div style={{padding:"10px 0 0 0"}}>
+                                status.state == 1 &&
+                                <div style={{padding: "10px 0 0 0"}}>
                                     <Button variant="outlined"
                                             type={"submit"}
-                                            style={{marginRight:'50px'}}
+                                            style={{marginRight: '50px'}}
                                     >
                                         Confirm
                                     </Button>
                                     <Button variant="outlined"
-                                            onClick={()=>{
+                                            onClick={() => {
                                                 setStatus({
                                                     msg: "",
-                                                    state:0
+                                                    state: 0
                                                 })
                                                 setAnchorEl(null);
                                                 setNewCategory(category_model)
@@ -280,13 +282,11 @@ const KeyWordView=(props)=>{
 }
 const EnhancedTableToolbar = (props) => {
     const classes = useToolbarStyles();
-    const { numSelected,onAddItem, message } = props;
+    const {numSelected, onAddItem, message} = props;
 
     return (
         <Toolbar
-            className={clsx(classes.root, {
-                [classes.highlight]: numSelected > 0,
-            })}
+            className={clsx(classes.root, {})}
         >
             {numSelected > 0 ? (
                 <Typography className={classes.title} color="inherit" variant="subtitle1" component="div">
@@ -312,11 +312,13 @@ const EnhancedTableToolbar = (props) => {
                 </Tooltip>
             )}*/}
             <Tooltip title="Add One Item">
-                <IconButton aria-label="filter list" onClick={()=>{
-                    props.clickAddIcon(true)
-                }}>
-                    <AddIcon />
-                </IconButton>
+                <Button aria-label="filter list" variant="outlined"
+                        onClick={() => {
+                            props.clickAddIcon(true)
+                        }}>
+                    {/*<AddIcon />*/}
+                    New Category
+                </Button>
             </Tooltip>
         </Toolbar>
     );
@@ -325,20 +327,20 @@ const EnhancedTableToolbar = (props) => {
 EnhancedTableToolbar.propTypes = {
     numSelected: PropTypes.number.isRequired,
 };
-const FileInput=(props)=>{
-    let fileInput=null
-    const handleChangeInputFile= async (event) => {
+const FileInput = (props) => {
+    let fileInput = null
+    const handleChangeInputFile = async (event) => {
         //console.log(event.target.files)
-        let file_key=props.id+'.txt'
+        let file_key = props.id + '.txt'
         let file = event.target.files[0]
         let reader = new FileReader();
         await reader.readAsText(file, "UTF-8")
         reader.onload = function (evt) {
             console.log(evt.target.result)
-            let content=evt.target.result
+            let content = evt.target.result
             props.updateData(content)
             Storage.put(file_key, content)
-                .then (result => console.log(result)) // {key: "test.txt"}
+                .then(result => console.log(result)) // {key: "test.txt"}
                 .catch(err => console.log(err));
         }
         reader.onerror = function (evt) {
@@ -347,25 +349,25 @@ const FileInput=(props)=>{
         console.log(reader)
 
     }
-    return(
+    return (
         <div>
             <input type="file"
                    ref={input => fileInput = input}
-                   style={{display:"none"}}
+                   style={{display: "none"}}
                    onChange={handleChangeInputFile}
 
                    accept="text/plain"/>
-            <IconButton onClick={()=>{
+            <IconButton onClick={() => {
                 fileInput.click()
             }}>
-                <UploadIcon fontSize="inherit" />
+                <UploadIcon fontSize="inherit"/>
             </IconButton>
         </div>
     )
 }
-FileInput.defaultProps={
-    id:"",
-    updateData:null
+FileInput.defaultProps = {
+    id: "",
+    updateData: null
 }
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -401,31 +403,33 @@ const useStyles = makeStyles((theme) => ({
         margin: 0
     }
 }));
-AddTable.defaultProps={
-    dense:false,
-    selectable:false,
-    rowsPerPage:5,
-    isHeader:true,
-    rows:[{categoryName:'',description:'',key_words:[]}],
-    status:{msg:"", state:0},
-    handleAddRows:null,
-    handleDownload:null,
-    handleUpdateRows:null
+AddTable.defaultProps = {
+    dense: false,
+    selectable: false,
+    rowsPerPage: 10,
+    isHeader: true,
+    rows: [{categoryName: '', description: '', key_words: []}],
+    status: {msg: "", state: 0},
+    handleAddRows: null,
+    handleDownload: null,
+    handleUpdateRows: null
 }
-let category_model={
+let category_model = {
     categoryName: "",
-    description:"",
+    description: "",
     key_words: "",
-    key_word_file:""
+    key_word_file: ""
 }
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
 });
+
 function AddTable(props) {
-    let popupState=null
+    let popupState = null
     const classes = useStyles();
     const [order, setOrder] = React.useState('asc');
     const [isDlg, setIsDlg] = React.useState(false);
+    const [isConfirmDlg, setIsConfirmDlg] = React.useState(false);
     const [newCategory, setNewCategory] = React.useState(category_model);
     const [status, setStatus] = React.useState(props.status);
     const [orderBy, setOrderBy] = React.useState('calories');
@@ -437,6 +441,7 @@ function AddTable(props) {
     const [rows, setRows] = React.useState(props.rows);
     React.useEffect(() => {
         setRows(props.rows);
+        setRowsPerPage(props.rows.length);
         setStatus(props.staus);
     }, [props])
     const handleRequestSort = (event, property) => {
@@ -487,17 +492,17 @@ function AddTable(props) {
         setDense(event.target.checked);
     };
     const handleAddItem = (event) => {
-        let temp=Object.assign([],rows);
-        temp.push({categoryName:'',description:'',key_words:[]})
+        let temp = Object.assign([], rows);
+        temp.push({categoryName: '', description: '', key_words: []})
         setStatus({
             msg: "",
-            state:0
+            state: 0
         })
         setRows(temp)
     };
-    const handleDownload= async (key) => {
+    const handleDownload = async (key) => {
         const signedURL = await Storage.get(key)
-        window.location.href=signedURL
+        window.location.href = signedURL
         console.log(signedURL)
     }
     const isSelected = (categoryName) => selected.indexOf(categoryName) !== -1;
@@ -507,14 +512,14 @@ function AddTable(props) {
     return (
         <div className={classes.root}>
             {
-                props.isHeader&&
+                props.isHeader &&
                 <EnhancedTableToolbar
                     numSelected={selected.length}
                     message={status.msg}
-                    clickAddIcon={(val)=>{
+                    clickAddIcon={(val) => {
                         setIsDlg(val)
                     }}
-                    onAddItem={handleAddItem} />
+                    onAddItem={handleAddItem}/>
             }
             <Paper className={classes.paper}>
 
@@ -552,12 +557,12 @@ function AddTable(props) {
                                             selected={isItemSelected}
                                         >
                                             {
-                                                selectable&&
-                                                <TableCell padding="checkbox"  padding="none">
+                                                selectable &&
+                                                <TableCell padding="checkbox" padding="none">
                                                     <Checkbox
                                                         onClick={(event) => handleClick(event, row.categoryName)}
                                                         checked={isItemSelected}
-                                                        inputProps={{ 'aria-labelledby': labelId }}
+                                                        inputProps={{'aria-labelledby': labelId}}
                                                     />
                                                 </TableCell>
                                             }
@@ -569,34 +574,46 @@ function AddTable(props) {
 
                                             </TableCell>
                                             <TableCell align="left" padding="none">
-                                                <KeyWordView category={row} updateCategory={(value)=>{
+                                                <KeyWordView category={row} updateCategory={(value) => {
                                                     //console.log(value)
                                                     props.handleUpdateRows([value])
                                                 }} status={status}/>
                                             </TableCell>
                                             <TableCell align="left" padding="none">
-                                                <div style={{display:"flex"}}>
+                                                <div style={{display: "flex"}}>
                                                     <div>
-                                                        <IconButton onClick={()=>{
-                                                            handleDownload(row.id+'.txt')
+                                                        <IconButton onClick={() => {
+                                                            handleDownload(row.id + '.txt')
                                                         }}>
-                                                            <DownloadIcon fontSize="inherit" />
+                                                            <DownloadIcon fontSize="inherit"/>
                                                         </IconButton>
                                                     </div>
-                                                    <FileInput id={row.id} updateData={(val)=>{
+                                                    <FileInput id={row.id} updateData={(val) => {
                                                         console.log(val)
-                                                        let temp=Object.assign([],rows)
-                                                        temp[index].key_words=val
+                                                        let temp = Object.assign([], rows)
+                                                        temp[index].key_words = val
                                                         setRows(temp)
                                                     }}/>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell align="left" padding="none">
+                                                <div style={{display: "flex"}}>
+                                                    <div>
+                                                        <IconButton onClick={() => {
+                                                            setSelected([row])
+                                                            setIsConfirmDlg(true)
+                                                        }}>
+                                                            <DeleteIcon style={{color: 'red'}} fontSize="inherit"/>
+                                                        </IconButton>
+                                                    </div>
                                                 </div>
                                             </TableCell>
                                         </TableRow>
                                     );
                                 })}
                             {emptyRows > 0 && (
-                                <TableRow style={{ height: (dense ? 33 : 53) * emptyRows }}>
-                                    <TableCell colSpan={6} />
+                                <TableRow style={{height: (dense ? 33 : 53) * emptyRows}}>
+                                    <TableCell colSpan={6}/>
                                 </TableRow>
                             )}
                         </TableBody>
@@ -618,60 +635,62 @@ function AddTable(props) {
                 open={isDlg}
                 TransitionComponent={Transition}
                 keepMounted
-                onClose={()=>{setIsDlg(false)}}
+                onClose={() => {
+                    setIsDlg(false)
+                }}
                 aria-labelledby="alert-dialog-slide-title"
                 aria-describedby="alert-dialog-slide-description"
             >
-                <DialogTitle id="alert-dialog-slide-title" >
-                    <div style={{fontSize:'30px',color:'grey'}}>
+                <DialogTitle id="alert-dialog-slide-title">
+                    <div style={{fontSize: '30px', color: 'grey'}}>
                         Create New Category
                     </div>
                 </DialogTitle>
                 <DialogContent>
                     <form
-                        onSubmit={(event)=>{
+                        onSubmit={(event) => {
                             event.preventDefault()
                             setIsDlg(false)
                             props.handleAddRows([newCategory])
                         }}
-                        style={{textAlign:"left"}}>
+                        style={{textAlign: "left"}}>
                         <TextField variant={"outlined"}
                                    size={"small"}
                                    value={newCategory.categoryName}
-                                   onChange={(e)=>{
-                                       let temp=Object.assign({},newCategory)
-                                       temp.categoryName=e.target.value
+                                   onChange={(e) => {
+                                       let temp = Object.assign({}, newCategory)
+                                       temp.categoryName = e.target.value
                                        setNewCategory(temp)
                                    }}
                                    required
                                    label={"CategoryName"}/><br/><br/>
                         <TextField variant={"outlined"}
                                    size={"small"}
-                                   onChange={(e)=>{
-                                       let temp=Object.assign({},newCategory)
-                                       temp.description=e.target.value
+                                   onChange={(e) => {
+                                       let temp = Object.assign({}, newCategory)
+                                       temp.description = e.target.value
                                        setNewCategory(temp)
                                    }}
                                    label={"CategoryDescription"}/><br/><br/>
                         <TextField variant={"outlined"}
                                    size={"small"}
                                    label={"KeyWords/Phrases"}
-                                   onChange={(e)=>{
-                                       let temp=Object.assign({},newCategory)
-                                       temp.key_words=e.target.value
+                                   onChange={(e) => {
+                                       let temp = Object.assign({}, newCategory)
+                                       temp.key_words = e.target.value
                                        setNewCategory(temp)
                                    }}
                                    rows={8}
                                    multiline/>
-                        <div >
+                        <div>
                             {
-                                status.state==0&&
-                                <div style={{padding:"10px 0 0 0"}}>
+                                status.state == 0 &&
+                                <div style={{padding: "10px 0 0 0"}}>
                                     <Button variant="outlined"
-                                            onClick={()=>{
+                                            onClick={() => {
                                                 setStatus({
                                                     msg: "Confirm your Category Addition",
-                                                    state:1
+                                                    state: 1
                                                 })
                                             }}
                                     >
@@ -679,23 +698,23 @@ function AddTable(props) {
                                     </Button>
                                 </div>
                             }
-                            <div style={{padding:"10px 0 0 0"}}>
+                            <div style={{padding: "10px 0 0 0"}}>
                                 {status.msg}
                             </div>
                             {
-                                status.state==1&&
-                                <div style={{padding:"10px 0 0 0"}}>
+                                status.state == 1 &&
+                                <div style={{padding: "10px 0 0 0"}}>
                                     <Button variant="outlined"
                                             type={"submit"}
-                                            style={{marginRight:'50px'}}
+                                            style={{marginRight: '50px'}}
                                     >
                                         Confirm
                                     </Button>
                                     <Button variant="outlined"
-                                            onClick={()=>{
+                                            onClick={() => {
                                                 setStatus({
                                                     msg: "",
-                                                    state:0
+                                                    state: 0
                                                 })
                                                 setIsDlg(false)
                                                 setNewCategory(category_model)
@@ -708,6 +727,49 @@ function AddTable(props) {
                         </div>
                     </form>
                 </DialogContent>
+
+
+            </Dialog>
+            <Dialog
+                open={isConfirmDlg}
+                TransitionComponent={Transition}
+                keepMounted
+                onClose={() => {
+                    setIsConfirmDlg(false)
+                }}
+                aria-labelledby="alert-dialog-slide-title"
+                aria-describedby="alert-dialog-slide-description"
+            >
+                <DialogTitle id="alert-dialog-slide-title">
+                    <div style={{fontSize: '30px', color: 'grey'}}>
+                        Confirm Delete
+                    </div>
+                </DialogTitle>
+                {selected.length > 0 && (
+                    <DialogContent>
+                        <div style={{marginBottom: '50px'}}>Are you sure delete category "{selected[0].categoryName}"
+                        </div>
+                        <div style={{padding: "10px 0 0 0"}}>
+                            <Button variant="outlined"
+                                    type={"submit"}
+                                    style={{marginRight: '50px'}}
+                                    onClick={() => {
+                                        props.handleDelete(selected[0])
+                                        setIsConfirmDlg(false)
+                                    }}
+                            >
+                                Confirm
+                            </Button>
+                            <Button variant="outlined"
+                                    onClick={() => {
+                                        setIsConfirmDlg(false)
+                                    }}
+                            >
+                                Cancel
+                            </Button>
+                        </div>
+                    </DialogContent>
+                )}
 
 
             </Dialog>
