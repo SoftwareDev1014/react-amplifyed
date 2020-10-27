@@ -152,6 +152,7 @@ const useToolbarStyles = makeStyles((theme) => ({
             },
     title: {
         flex: '1 1 100%',
+        color:'grey'
     },
 }));
 
@@ -285,30 +286,20 @@ const EnhancedTableToolbar = (props) => {
     const {numSelected, onAddItem, message} = props;
 
     return (
-        <div>
-            <Tooltip title="Add One Item" style={{width:'250px',textAlign:'center'}}>
-                <Button aria-label="filter list" variant="outlined"
-                        onClick={() => {
-                            props.clickAddIcon(true)
-                        }}>
-                    {/*<AddIcon />*/}
-                    New Category
-                </Button>
-            </Tooltip>
-            <Toolbar
-                className={clsx(classes.root, {})}
-            >
-                {numSelected > 0 ? (
-                    <Typography className={classes.title} color="inherit" variant="subtitle1" component="div">
-                        {numSelected} selected
-                    </Typography>
-                ) : (
-                    <Typography className={classes.title} variant="h6" id="tableTitle" component="div">
-                        {message}
-                    </Typography>
-                )}
+        <Toolbar
+            className={clsx(classes.root, {})}
+        >
+            {numSelected > 0 ? (
+                <Typography className={classes.title} color="inherit" variant="subtitle1" component="div">
+                    {numSelected} selected
+                </Typography>
+            ) : (
+                <Typography className={classes.title} variant="h6" id="tableTitle" component="div">
+                    {message==''?'Manage Category':message}
+                </Typography>
+            )}
 
-                {/*{numSelected > 0 ? (
+            {/*{numSelected > 0 ? (
                 <Tooltip title="Delete">
                     <IconButton aria-label="delete">
                         <DeleteIcon />
@@ -321,9 +312,16 @@ const EnhancedTableToolbar = (props) => {
                     </IconButton>
                 </Tooltip>
             )}*/}
-
-            </Toolbar>
-        </div>
+            <Tooltip title="Add One Item" >
+                <Button aria-label="filter list" variant="outlined"
+                        onClick={() => {
+                            props.clickAddIcon(true)
+                        }}>
+                    {/*<AddIcon />*/}
+                    New Category
+                </Button>
+            </Tooltip>
+        </Toolbar>
     );
 };
 
